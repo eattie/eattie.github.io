@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project 1: Colorizing the Prokudin-Gorskii Collection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #e0e0e0;
+            background: #0a0a0a;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            font-weight: 300;
+            letter-spacing: -1px;
+        }
+        
+        h2 {
+            color: #fff;
+            margin: 60px 0 30px 0;
+            font-size: 2em;
+            font-weight: 400;
+        }
+        
+        p {
+            margin-bottom: 20px;
+            color: #b0b0b0;
+            line-height: 1.7;
+        }
+        
+        .approach-list {
+            margin: 30px 0;
+        }
+        
+        .approach-item {
+            background: #161616;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 3px solid #4a9eff;
+        }
+        
+        .approach-item h3 {
+            color: #4a9eff;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        .featured {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .featured-card {
+            background: #111;
+            border: 1px solid #222;
+        }
+        
+        .featured-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .featured-info {
+            padding: 20px;
+        }
+        
+        .featured-title {
+            font-size: 1.3em;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        
+        .displacement {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            color: #4a9eff;
+            font-size: 0.9em;
+            margin: 10px 0;
+        }
+        
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+        
+        .image-card {
+            background: #111;
+            border: 1px solid #222;
+            transition: all 0.3s ease;
+            transform: scale(1);
+        }
+        
+        .image-card:hover {
+            border-color: #ffd700;
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(255, 215, 0, 0.2);
+        }
+        
+        .image-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .image-info {
+            padding: 15px;
+        }
+        
+        .image-name {
+            color: #fff;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .image-shifts {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            font-size: 0.85em;
+            color: #888;
+            line-height: 1.5;
+        }
+        
+        .points-list {
+            margin: 30px 0;
+        }
+        
+        .points-list li {
+            color: #b0b0b0;
+            margin: 15px 0 15px 30px;
+            line-height: 1.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Computer Vision Project 1</h1>
+        <p style="font-size: 1.1em; color: #888; margin-bottom: 40px;">CS180 | Etai Abukasis</p>
+
+        <h2>Overview</h2>
+      <p style="color: #b0b0b0; margin-bottom: 30px;">The goal of this project is to take the digitized Prokudin-Gorskii glass plate images and automatically produce color images by aligning the three color channel images. Prokudin-Gorskii captured 
+            + his photographs by recording three exposures of every scene onto a glass plate using red, green, and blue filters, and this project reconstructs the original color by extracting and aligning these channels.</p>
+        <h2>Approach</h2>
+        <div style="background: #161616; padding: 30px; border-left: 3px solid #4a9eff; margin-bottom: 50px;">
+            <h3 style="color: #4a9eff; margin-bottom: 15px; font-size: 1.1em;">Part 1: Small .jpg Images</h3>
+             <p>For smaller photos, I implemented an exhaustive search over a displacement window of 15 pixels to find the best alignment for the red and green channels that minimizes error with the blue channel. I went with SSD for the scoring metric, and crop 10% of the image edges before processing to avoid having the borders affect the alignment.</p>
+            
+            <h3 style="color: #4a9eff; margin-top: 25px; margin-bottom: 15px; font-size: 1.1em;">Part 2: Pyramid Speedup on Large .tif Images</h3>
+            <p>The previous algorithm wouldn't work on larger .tif images due to taking too long, so I used an image pyramid. Images are recursively downsampled by half using skimage.transform.resize until reaching below 100 pixels. Starting from the coarsest scale, I find an initial alignment, then refine it at each larger scale by searching a 5x5 window around the scaled up displacement. For difficult images like Emir where the initial alignment creates shifts over 50 pixels, the algorithm falls back to using edge features computed from image gradients.</p>
+        </div>
+
+        <h2>Results</h2>
+        <p style="color: #b0b0b0; margin-bottom: 30px;">Below are the results with calculated displacements (dx, dy) for the Green and Red channels relative to the Blue channel.</p>
+        <div class="gallery">
+            <div class="image-card">
+                <img src="images/cathedral_aligned.jpg" alt="Cathedral">
+                <div class="image-info">
+                    <div class="image-name">cathedral.jpg</div>
+                    <div class="image-shifts">G: (2, 5) | R: (3, 12)</div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <img src="images/monastery_aligned.jpg" alt="Monastery">
+                <div class="image-info">
+                    <div class="image-name">monastery.jpg</div>
+                    <div class="image-shifts">G: (2, -3) | R: (2, 3)</div>
+                </div>
+            </div>
+            
+            <div class="image-card">
+                <img src="images/tobolsk_aligned.jpg" alt="Tobolsk">
+                <div class="image-info">
+                    <div class="image-name">tobolsk.jpg</div>
+                    <div class="image-shifts">G: (3, 3) | R: (3, 6)</div>
+                </div>
+            </div>
+            
+            <div class="image-card">
+                <img src="images/church_aligned.jpg" alt="Church">
+                <div class="image-info">
+                    <div class="image-name">church.tif</div>
+                    <div class="image-shifts">G: (4, 25) | R: (-4, 58)</div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <img src="images/emir_aligned.jpg" alt="Emir">
+                <div class="image-info">
+                    <div class="image-name">emir.tif</div>
+                    <div class="image-shifts">G: (24, 49) | R: (40, 107)</div>
+                </div>
+            </div>
+            
+            <div class="image-card">
+                <img src="images/harvesters_aligned.jpg" alt="Harvesters">
+                <div class="image-info">
+                    <div class="image-name">harvesters.tif</div>
+                    <div class="image-shifts">G: (18, 60) | R: (13, 124)</div>
+                </div>
+            </div>
+            
+            <div class="image-card">
+                <img src="images/icon_aligned.jpg" alt="Icon">
+                <div class="image-info">
+                    <div class="image-name">icon.tif</div>
+                    <div class="image-shifts">G: (16, 39) | R: (23, 90)</div>
+                </div>
+            </div>
+            
+            <div class="image-card">
+                <img src="images/italil_aligned.jpg" alt="Lady">
+                <div class="image-info">
+                    <div class="image-name">italil.tif</div>
+                    <div class="image-shifts">G: (22, 39) | R: (36, 77)</div>
+                </div>
+            </div>
+            
+            <div class="image-card">
+                <img src="images/lastochikino_aligned.jpg" alt="Lastochikino">
+                <div class="image-info">
+                    <div class="image-name">lastochikino.tif</div>
+                    <div class="image-shifts">G: (-2, -3) | R: (-8, 76)</div>
+                </div>
+            </div>
+            
+            <div class="image-card">
+                <img src="images/lugano_aligned.jpg" alt="Lugano">
+                <div class="image-info">
+                    <div class="image-name">lugano.tif</div>
+                    <div class="image-shifts">G: (-17, 41) | R: (-29, 92)</div>
+                </div>
+            </div>
+            
+            <div class="image-card">
+                <img src="images/melons_aligned.jpg" alt="Melons">
+                <div class="image-info">
+                    <div class="image-name">melons.tif</div>
+                    <div class="image-shifts">G: (10, 80) | R: (13, 176)</div>
+                </div>
+            </div>
+            
+            <div class="image-card">
+                <img src="images/self_portrait_aligned.jpg" alt="Self Portrait">
+                <div class="image-info">
+                    <div class="image-name">self_portrait.tif</div>
+                    <div class="image-shifts">G: (29, 78) | R: (37, 175)</div>
+                </div>
+            </div>
+            
+            <div class="image-card">
+                <img src="images/siren_aligned.jpg" alt="Siren">
+                <div class="image-info">
+                    <div class="image-name">siren.tif</div>
+                    <div class="image-shifts">G: (-7, 49) | R: (-24, 96)</div>
+                </div>
+            </div>
+            
+            <div class="image-card">
+                <img src="images/three_generations_aligned.jpg" alt="Three Generations">
+                <div class="image-info">
+                    <div class="image-name">three_generations.tif</div>
+                    <div class="image-shifts">G: (12, 54) | R: (9, 111)</div>
+                </div>
+            </div>
+        </div>
+
+        <h2>Additional Images from the Collection</h2>
+        <p style="color: #b0b0b0; margin-bottom: 30px;">Here are additional images I selected from the Prokudin-Gorskii collection:</p>
+        <div class="gallery">
+            <div class="image-card">
+                <img src="images/milan_aligned.jpg" alt="Milan">
+                <div class="image-info">
+                    <div class="image-name">milan.jpg</div>
+                    <div class="image-shifts">G: (1, 6) | R: (3, 13)</div>
+                </div>
+            </div>
+            
+            <div class="image-card">
+                <img src="images/mosque_aligned.jpg" alt="Mosque">
+                <div class="image-info">
+                    <div class="image-name">mosque.tif</div>
+                    <div class="image-shifts">G: (34, 56) | R: (60, 125)</div>
+                </div>
+            </div>
+            
+            <div class="image-card">
+                <img src="images/trees_aligned.jpg" alt="Trees">
+                <div class="image-info">
+                    <div class="image-name">trees.jpg</div>
+                    <div class="image-shifts">G: (0, 4) | R: (1, 13)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
