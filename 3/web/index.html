@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS180 Project 2: Fun with Filters and Frequencies</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            line-height: 1.6;
+            color: #000;
+            background-color: #fff;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #000;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: normal;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #666;
+        }
+
+        h2 {
+            font-size: 26px;
+            margin: 30px 0 20px 0;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #000;
+        }
+
+        h3 {
+            font-size: 20px;
+            margin: 20px 0 10px 0;
+            font-weight: bold;
+        }
+
+        h4 {
+            font-size: 18px;
+            margin: 15px 0 10px 0;
+            font-weight: bold;
+        }
+
+        h5 {
+            font-size: 16px;
+            margin: 15px 0 10px 0;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .subsection {
+            margin: 20px 0;
+        }
+
+        .image-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .image-item {
+            text-align: center;
+            position: relative;
+        }
+
+        .image-item img {
+            width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, z-index 0s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .image-item img:hover {
+            transform: scale(1.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+            position: relative;
+        }
+        
+        /* Apply hover effect to all images on the page */
+        img {
+            transition: transform 0.3s ease, box-shadow 0.3s ease, z-index 0s;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        img:hover {
+            transform: scale(1.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            position: relative;
+        }
+
+        .image-item p {
+            margin-top: 5px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .explanation {
+            margin: 15px 0;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+
+        .code-block {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 10px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .note {
+            background: #f9f9f9;
+            border-left: 3px solid #666;
+            padding: 10px;
+            margin: 20px 0;
+            font-size: 16px;
+        }
+
+        .note strong {
+            color: #000;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0 20px 0;
+            margin-top: 50px;
+            border-top: 1px solid #000;
+            font-size: 14px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>CS180 Project 2: Fun with Filters and Frequencies</h1>
+        <p class="subtitle">Etai Abukasis | Fall 2025</p>
+    </header>
+
+    <main>
+        <!-- Part 1: Fun with Filters -->
+        <section>
+            <h2>Part 1: Fun with Filters</h2>
+            
+            <!-- Part 1.1 -->
+            <div class="subsection">
+                <h3>1.1 Finite Difference Operator</h3>
+                <p class="explanation">
+                    I implemented 2D convolution from scratch using only numpy. I created both four loop and two loop implementations with zero padding to maintain output size. I applied a 9x9 box filter for blurring and finite difference operators Dx = [[1, 0, -1]] and Dy = [[1], [0], [-1]] to detect edges in my grayscale headshot.
+                </p>
+                
+                <div class="image-grid">
+                    <div class="image-item">
+                        <img src="images/original_gray.jpg" alt="Original Image">
+                        <p>Original Image (Grayscale)</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/box_filter_result.jpg" alt="Box Filter">
+                        <p>9x9 Box Filter</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/dx_edges.jpg" alt="Horizontal Edges">
+                        <p>Dx (Horizontal Edges)</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/dy_edges.jpg" alt="Vertical Edges">
+                        <p>Dy (Vertical Edges)</p>
+                    </div>
+                </div>
+
+                <h4>Convolution Implementation</h4>
+                <div style="margin: 20px 0;">
+                    <div style="margin-bottom: 30px;">
+                        <img src="images/4loop.png" alt="Four loop Implementation" style="width: 100%; max-width: 800px; display: block; margin: 0 auto; border: 1px solid #ddd;">
+                        <p style="text-align: center; margin-top: 10px; color: #666; font-size: 12px;">Four loop Convolution Implementation</p>
+                    </div>
+                    <div style="margin-bottom: 30px;">
+                        <img src="images/2loop.png" alt="Two loop Implementation" style="width: 100%; max-width: 800px; display: block; margin: 0 auto; border: 1px solid #ddd;">
+                        <p style="text-align: center; margin-top: 10px; color: #666; font-size: 12px;">Two loop Convolution Implementation</p>
+                    </div>
+                </div>
+
+                <h4>Runtime Comparison</h4>
+                <table style="margin: 20px auto; border-collapse: collapse;">
+                    <tr style="border-bottom: 1px solid #ddd;">
+                        <th style="padding: 8px; text-align: left;">Method</th>
+                        <th style="padding: 8px; text-align: right;">Time (seconds)</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px;">Four loop convolution</td>
+                        <td style="padding: 8px; text-align: right;">202.60</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px;">Two loop convolution</td>
+                        <td style="padding: 8px; text-align: right;">20.56</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px;">scipy.signal.convolve2d</td>
+                        <td style="padding: 8px; text-align: right;">0.72</td>
+                    </tr>
+                </table>
+                
+                <p class="explanation">
+                    The two loop implementation is approximately 10x faster than four loop by vectorizing the inner convolution operation. However, scipy.signal.convolve2d is much faster than both (see comparisons above). I used zero padding to maintain output size equal to input size.
+                </p>
+            </div>
+
+            <!-- Part 1.2 -->
+            <div class="subsection">
+                <h3>1.2 Edge Detection</h3>
+                <p class="explanation">
+                    I applied finite difference operators Dx and Dy to the cameraman image to compute partial derivatives. I calculated the gradient magnitude using sqrt(Dx² + Dy²) and binarized the result using a threshold of 0.175 to create edge images.
+                </p>
+                
+                <div class="image-grid">
+                    <div class="image-item">
+                        <img src="images/cameraman_original.jpg" alt="Original Cameraman">
+                        <p>Original Cameraman</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/cameraman_dx.jpg" alt="Partial Derivative X">
+                        <p>Partial Derivative (Dx)</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/cameraman_dy.jpg" alt="Partial Derivative Y">
+                        <p>Partial Derivative (Dy)</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/gradient_magnitude.jpg" alt="Gradient Magnitude">
+                        <p>Gradient Magnitude</p>
+                    </div>
+                </div>
+                
+                <h4>Edge Detection</h4>
+                <div style="text-align: center; margin: 20px 0;">
+                    <img src="images/edges_binarized.jpg" alt="Binarized Edges" style="max-width: 400px; border: 1px solid #ddd;">
+                    <p style="margin-top: 10px; color: #666; font-size: 12px;">Binarized Edge Image (threshold = 0.175)</p>
+                </div>
+                
+                <p class="explanation">
+                    I tried several threshold values but settled on 0.175 as it gave the best balance between capturing important edges and suppressing noise. Lower values included too much noise, while higher values missed edge details I wanted to preserve.
+                </p>
+            </div>
+
+            <!-- Part 1.3 -->
+            <div class="subsection">
+                <h3>1.3 Derivative of Gaussian (DoG) Filter</h3>
+                <p class="explanation">
+                    I created a Gaussian filter using cv2.getGaussianKernel(10, 3) and applied it before computing derivatives to reduce noise. I also created Derivative of Gaussian filters by convolving the Gaussian with Dx and Dy. 
+                </p>
+                
+                <h4>Smoothed Edge Detection</h4>
+                <div class="image-grid">
+                    <div class="image-item">
+                        <img src="images/cameraman_blurred.jpg" alt="Blurred Cameraman">
+                        <p>Gaussian Blurred</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/dx_blurred.jpg" alt="Dx Blurred">
+                        <p>Dx (after smoothing)</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/dy_blurred.jpg" alt="Dy Blurred">
+                        <p>Dy (after smoothing)</p>
+                    </div>
+                </div>
+                
+                <h4>Derivative of Gaussian Filters</h4>
+                <div style="display: flex; justify-content: center; gap: 20px; margin: 20px 0;">
+                    <div style="flex: 1; max-width: 400px;">
+                        <div style="width: 100%; height: 300px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd;">
+                            <img src="images/dog_x.png" alt="DoG X Filter" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                        </div>
+                    </div>
+                    <div style="flex: 1; max-width: 400px;">
+                        <div style="width: 100%; height: 300px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd;">
+                            <img src="images/dog_y.png" alt="DoG Y Filter" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="explanation">
+                    The Gaussian smoothing significantly reduces noise compared to direct finite differences from Part 1.2. The DoG filters demonstrate how smoothing and differentiation can be combined into single
+  convolution kernels that would achieve the same result as the two-step process.
+                </p>
+            </div>
+        </section>
+
+        <!-- Part 2: Fun with Frequencies -->
+        <section>
+            <h2>Part 2: Fun with Frequencies</h2>
+            
+            <!-- Part 2.1 -->
+            <div class="subsection">
+                <h3>2.1 Image "Sharpening"</h3>
+                <p class="explanation">
+                    I implemented unsharp masking to sharpen images by extracting and amplifying high frequencies. I used the formula: sharpened = image + α(image - blurred_image),
+                    -  where α = 2 controls the sharpening strength. I applied this to both the Taj Mahal and banana tree images.
+                </p>
+                
+                <h4>Taj Mahal</h4>
+                <div class="image-grid">
+                    <div class="image-item">
+                        <img src="images/taj_original.jpg" alt="Taj Original">
+                        <p>Original</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/taj_blurred.jpg" alt="Taj Blurred">
+                        <p>Gaussian Blurred</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/taj_highfreq.jpg" alt="Taj High Frequency">
+                        <p>High Frequencies</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/taj_sharpened.jpg" alt="Taj Sharpened">
+                        <p>Sharpened (α = 2)</p>
+                    </div>
+                </div>
+                
+                <h4>Banana Tree</h4>
+                <div class="image-grid">
+                    <div class="image-item">
+                        <img src="images/banana_original.jpg" alt="Banana Original">
+                        <p>Original</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/banana_blurred.jpg" alt="Banana Blurred">
+                        <p>Gaussian Blurred</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/banana_highfreq.jpg" alt="Banana High Frequency">
+                        <p>High Frequencies</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/banana_sharpened.jpg" alt="Banana Sharpened">
+                        <p>Sharpened (α = 2)</p>
+                    </div>
+                </div>
+                
+                <p class="explanation">
+                    The high frequency images show the fine details extracted by subtracting the blurred version from the original. These details are amplified by α = 2 and added back to enhance image sharpness.
+                </p>
+            </div>
+
+            <!-- Part 2.2 -->
+            <div class="subsection">
+                <h3>2.2 Hybrid Images</h3>
+                <p class="explanation">
+                    I created hybrid images by combining low frequencies from one image with high frequencies from another. Using the aligned Derek and Nutmeg images, I applied a low-pass filter (σ=10) to Derek and a high-pass filter (σ=3) to Nutmeg, then combined them. The result changes interpretation based on viewing distance.
+                </p>
+                
+                <h4>Derek + Nutmeg Hybrid</h4>
+                <div class="image-grid">
+                    <div class="image-item">
+                        <img src="images/derek_original.jpg" alt="Derek Original">
+                        <p>Derek (aligned)</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/nutmeg_original.jpg" alt="Nutmeg Original">
+                        <p>Nutmeg (aligned)</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/derek_lowpass.jpg" alt="Derek Low-pass">
+                        <p>Derek Low-pass (σ=10)</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/nutmeg_highpass.jpg" alt="Nutmeg High-pass">
+                        <p>Nutmeg High-pass (σ=3)</p>
+                    </div>
+                </div>
+                
+                <h4>Result</h4>
+                <div style="text-align: center; margin: 20px 0;">
+                    <img src="images/hybrid_derek_nutmeg.jpg" alt="Derek Nutmeg Hybrid" style="max-width: 400px; border: 1px solid #ddd;">
+                    <p style="margin-top: 10px; color: #666; font-size: 14px;">Hybrid Image - View from close and far distances</p>
+                </div>
+                
+                <h4>Frequency Analysis</h4>
+                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin: 20px 0;">
+                    <div class="image-item">
+                        <img src="images/fft_derek.jpg" alt="FFT Derek Original">
+                        <p>FFT Derek Original</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/fft_nutmeg.jpg" alt="FFT Nutmeg Original">
+                        <p>FFT Nutmeg Original</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/fft_derek_lowpass.jpg" alt="FFT Derek Low-pass">
+                        <p>FFT Derek Low-pass</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/fft_nutmeg_highpass.jpg" alt="FFT Nutmeg High-pass">
+                        <p>FFT Nutmeg High-pass</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/fft_hybrid.jpg" alt="FFT Hybrid">
+                        <p>FFT Hybrid Final</p>
+                    </div>
+                </div>
+                
+                <p class="explanation">
+                    I chose σ₁ = 10 for Derek's low-pass filter to preserve overall facial structure, and σ₂ = 3 for Nutmeg's high-pass filter to capture fine fur details. The FFT analysis shows how different frequency bands are preserved in the final hybrid.
+                </p>
+                
+                <h4>Additional Hybrid Images</h4>
+                
+                <h5>Amanda + Cute Cat</h5>
+                <div class="image-grid">
+                    <div class="image-item">
+                        <img src="images/amanda_original.jpg" alt="Amanda Original">
+                        <p>Amanda (Far)</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/cutecat_original.jpg" alt="Cute Cat Original">
+                        <p>Cute Cat (Close)</p>
+                    </div>
+                    <div class="image-item" style="grid-column: span 2;">
+                        <img src="images/hybrid_amanda_cat.jpg" alt="Amanda Cat Hybrid" style="max-width: 300px;">
+                        <p>Hybrid Result</p>
+                    </div>
+                </div>
+                
+                <h5>Jason + Jimmy</h5>
+                <div class="image-grid">
+                    <div class="image-item">
+                        <img src="images/jason_original.jpg" alt="Jason Original">
+                        <p>Jason (Far)</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/jimmy_original.jpg" alt="Jimmy Original">
+                        <p>Jimmy (Close)</p>
+                    </div>
+                    <div class="image-item" style="grid-column: span 2;">
+                        <img src="images/hybrid_jason_jimmy.jpg" alt="Jason Jimmy Hybrid" style="max-width: 300px;">
+                        <p>Hybrid Result</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Part 2.3 -->
+            <div class="subsection">
+                <h3>2.3 Gaussian and Laplacian Stacks</h3>
+                <p class="explanation">
+                    I created Gaussian stacks by repeatedly applying a Gaussian filter (σ=4) to progressively blur the images across 6 levels. For the Laplacian stacks, I subtracted adjacent Gaussian levels to isolate specific frequency bands, with the final level containing the lowest frequencies from the last Gaussian level. I applied scaling factors for better visualization of the different frequency bands.
+                </p>
+                
+                <h4>Apple Gaussian Stack</h4>
+                <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 20px 0;">
+                    <div class="image-item">
+                        <img src="images/apple_gaussian_0.jpg" alt="Apple Level 0">
+                    </div>
+                    <div class="image-item">
+                        <img src="images/apple_gaussian_1.jpg" alt="Apple Level 1">
+                    </div>
+                    <div class="image-item">
+                        <img src="images/apple_gaussian_2.jpg" alt="Apple Level 2">
+                    </div>
+                    <div class="image-item">
+                        <img src="images/apple_gaussian_3.jpg" alt="Apple Level 3">
+                    </div>
+                    <div class="image-item">
+                        <img src="images/apple_gaussian_4.jpg" alt="Apple Level 4">
+                    </div>
+                    <div class="image-item">
+                        <img src="images/apple_gaussian_5.jpg" alt="Apple Level 5">
+                    </div>
+                </div>
+                
+                <h4>Orange Gaussian Stack</h4>
+                <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 20px 0;">
+                    <div class="image-item">
+                        <img src="images/orange_gaussian_0.jpg" alt="Orange Level 0">
+                    </div>
+                    <div class="image-item">
+                        <img src="images/orange_gaussian_1.jpg" alt="Orange Level 1">
+                    </div>
+                    <div class="image-item">
+                        <img src="images/orange_gaussian_2.jpg" alt="Orange Level 2">
+                    </div>
+                    <div class="image-item">
+                        <img src="images/orange_gaussian_3.jpg" alt="Orange Level 3">
+                    </div>
+                    <div class="image-item">
+                        <img src="images/orange_gaussian_4.jpg" alt="Orange Level 4">
+                    </div>
+                    <div class="image-item">
+                        <img src="images/orange_gaussian_5.jpg" alt="Orange Level 5">
+                    </div>
+                </div>
+                
+                <h4>Apple Laplacian Stack</h4>
+                <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 20px 0;">
+                    <div class="image-item">
+                        <img src="images/apple_laplacian_0.jpg" alt="Apple Laplacian 0">
+                    </div>
+                    <div class="image-item">
+                        <img src="images/apple_laplacian_1.jpg" alt="Apple Laplacian 1">
+                    </div>
+                    <div class="image-item">
+                        <img src="images/apple_laplacian_2.jpg" alt="Apple Laplacian 2">
+                    </div>
+                    <div class="image-item">
+                        <img src="images/apple_laplacian_3.jpg" alt="Apple Laplacian 3">
+                    </div>
+                    <div class="image-item">
+                        <img src="images/apple_laplacian_4.jpg" alt="Apple Laplacian 4">
+                    </div>
+                    <div class="image-item">
+                        <img src="images/apple_laplacian_5.jpg" alt="Apple Laplacian 5">
+                    </div>
+                </div>
+                
+                <h4>Orange Laplacian Stack</h4>
+                <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 20px 0;">
+                    <div class="image-item">
+                        <img src="images/orange_laplacian_0.jpg" alt="Orange Laplacian 0">
+                    </div>
+                    <div class="image-item">
+                        <img src="images/orange_laplacian_1.jpg" alt="Orange Laplacian 1">
+                    </div>
+                    <div class="image-item">
+                        <img src="images/orange_laplacian_2.jpg" alt="Orange Laplacian 2">
+                    </div>
+                    <div class="image-item">
+                        <img src="images/orange_laplacian_3.jpg" alt="Orange Laplacian 3">
+                    </div>
+                    <div class="image-item">
+                        <img src="images/orange_laplacian_4.jpg" alt="Orange Laplacian 4">
+                    </div>
+                    <div class="image-item">
+                        <img src="images/orange_laplacian_5.jpg" alt="Orange Laplacian 5">
+                    </div>
+                </div>
+                
+                <h4>Figure 3.42 Recreation</h4>
+                <p class="explanation">
+                    I recreated Figure 3.42 from Burt & Adelson 1983. Each row shows the apple masked contribution, orange masked contribution, and their blend at that frequency level, culminating in the final oraple result.
+                </p>
+                
+                <!-- Figure 3.42 Grid -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0;">
+                    <!-- Row 1: Level 0 (High Frequency) -->
+                    <div class="image-item">
+                        <img src="images/figure342_a.jpg" alt="Apple Level 0 Masked">
+                        <p>(a)</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/figure342_b.jpg" alt="Orange Level 0 Masked">
+                        <p>(b)</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/figure342_c.jpg" alt="Blend Level 0">
+                        <p>(c)</p>
+                    </div>
+                    
+                    <!-- Row 2: Level 2 (Mid Frequency) -->
+                    <div class="image-item">
+                        <img src="images/figure342_d.jpg" alt="Apple Level 2 Masked">
+                        <p>(d)</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/figure342_e.jpg" alt="Orange Level 2 Masked">
+                        <p>(e)</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/figure342_f.jpg" alt="Blend Level 2">
+                        <p>(f)</p>
+                    </div>
+                    
+                    <!-- Row 3: Level 4 (Low Frequency) -->
+                    <div class="image-item">
+                        <img src="images/figure342_g.jpg" alt="Apple Level 4 Masked">
+                        <p>(g)</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/figure342_h.jpg" alt="Orange Level 4 Masked">
+                        <p>(h)</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/figure342_i.jpg" alt="Blend Level 4">
+                        <p>(i) </p>
+                    </div>
+                    
+                    <!-- Row 4: Final Images -->
+                    <div class="image-item">
+                        <img src="images/figure342_j.jpg" alt="Apple Final">
+                        <p>(j) </p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/figure342_k.jpg" alt="Orange Final">
+                        <p>(k) </p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/figure342_l.jpg" alt="Oraple Final">
+                        <p>(l)</p>
+                    </div>
+                </div>
+                
+                <p class="explanation">
+                    I used multiresolution blending to smoothly combine the images. I created Laplacian stacks for both images and a Gaussian stack of the mask to define the blend boundary. At each frequency level, I blended the corresponding Laplacian layers using the blurred mask, then summed all levels to reconstruct the blended result.
+                </p>
+            </div>
+
+            <!-- Part 2.4 -->
+            <div class="subsection">
+                <h3>2.4 Multiresolution Blending (The Oraple!)</h3>
+                <p class="explanation">
+                    I applied multiresolution blending to create seamless image composites. For the oraple, I used a vertical mask to blend the left half of the apple with the right half of the orange. I also created two custom blends: rabbt  and rat with a horizontal mask and bridges with a diagonal mask.
+                </p>
+                
+                <h4>Apple + Orange = Oraple</h4>
+                <div class="image-grid">
+                    <div class="image-item">
+                        <img src="images/apple_original.jpg" alt="Apple">
+                        <p>Apple</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/orange_original.jpg" alt="Orange">
+                        <p>Orange</p>
+                    </div>
+                    <div class="image-item" style="grid-column: span 2;">
+                        <img src="images/oraple_blend.jpg" alt="Oraple" style="max-width: 300px;">
+                        <p>Multiresolution Blend (Oraple)</p>
+                    </div>
+                </div>
+                
+                <h4>Custom Blends</h4>
+                
+                <h5>Rabbit + Rat</h5>
+                <div class="image-grid">
+                    <div class="image-item">
+                        <img src="images/rabbit_original.jpg" alt="Rabbit">
+                        <p>Rabbit</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/rat_original.jpg" alt="Rat">
+                        <p>Rat</p>
+                    </div>
+                    <div class="image-item" style="grid-column: span 2;">
+                        <img src="images/rabbit_rat_blend.jpg" alt="Rabbit Rat Blend" style="max-width: 300px;">
+                        <p>Horizontal Multiresolution Blend</p>
+                    </div>
+                </div>
+                
+                <h5>Bridge1 + Bridge2</h5>
+                <div class="image-grid">
+                    <div class="image-item">
+                        <img src="images/bridge1_original.jpg" alt="Bridge 1">
+                        <p>Bridge 1</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/bridge2_original.jpg" alt="Bridge 2">
+                        <p>Bridge 2</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/bridge_mask.jpg" alt="Bridge Mask">
+                        <p>Diagonal Mask</p>
+                    </div>
+                    <div class="image-item">
+                        <img src="images/bridge_blend.jpg" alt="Bridge Blend">
+                        <p>Diagonal Blend Result</p>
+                    </div>
+                </div>
+                
+                <p class="explanation">
+                    My custom blends explored different mask shapes for creative transitions. The rabbit and rat blend uses a horizontal split to combine the top and bottom halves, while the bridge blend uses a diagonal mask to create an angled transition between the two bridge images.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>CS180: Introduction to Computer Vision and Computational Photography</p>
+        <p>Fall 2025 | UC Berkeley</p>
+    </footer>
+</body>
+</html>
