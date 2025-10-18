@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS180 Project 3A</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Project 3A: Image Warping and Mosaicing</h1>
+        <p>CS180/280A</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>A.1: Shoot and Digitize Pictures</h2>
+            <p>I captured multiple image pairs by rotating the camera around a fixed center of projection. I took the images around campus, and honestly what I did which may not be ideal was place my phone on something and then move the camera so the y stayed the same but x moved around.</p>
+
+            <h3>Image Set 1</h3>
+            <div class="images">
+                <div class="img-container">
+                    <img src="images/a1/IMG1.jpg" alt="Image 1">
+                    <p>Image 1</p>
+                </div>
+                <div class="img-container">
+                    <img src="images/a1/IMG2.jpg" alt="Image 2">
+                    <p>Image 2</p>
+                </div>
+            </div>
+
+            <h3>Image Set 2</h3>
+            <div class="images">
+                <div class="img-container">
+                    <img src="images/a1/IMG3.jpg" alt="Image 3">
+                    <p>Image 3</p>
+                </div>
+                <div class="img-container">
+                    <img src="images/a1/IMG2.5.jpg" alt="Image 4">
+                    <p>Image 4</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>A.2: Recover Homographies</h2>
+            <p>To compute homographies, I manually select corresponding points between image pairs. I used a similar method to project2 (matplotlib qt). I selected 8 corresponding points.</p>
+
+            <h3>Correspondence Pair 1</h3>
+            <div class="images">
+                <div class="img-container">
+                    <img src="images/a2/1.png" alt="Correspondence points - Image 1">
+                    <p>Image 1 with Points</p>
+                </div>
+                <div class="img-container">
+                    <img src="images/a2/2.png" alt="Correspondence points - Image 2">
+                    <p>Image 2 with Points</p>
+                </div>
+            </div>
+
+            <h3>Correspondence Pair 2</h3>
+            <div class="images">
+                <div class="img-container">
+                    <img src="images/a2/3.png" alt="Correspondence points - Image 3">
+                    <p>Image 3 with Points</p>
+                </div>
+                <div class="img-container">
+                    <img src="images/a2/4.png" alt="Correspondence points - Image 4">
+                    <p>Image 4 with Points</p>
+                </div>
+            </div>
+
+            <h3>System of Equations</h3>
+            <div class="img-container">
+                <img src="images/a2/systemofeq.jpg" alt="System of equations for homography computation">
+            </div>
+
+            <h3>Recovered Homographies</h3>
+
+            <div class="matrix-container">
+                <div>
+                    <div class="matrix-label">H₂ (Image Pair 1: IMG1 → IMG2)</div>
+                    <div class="matrix">
+                        <table>
+                            <tr>
+                                <td>0.273588</td>
+                                <td>-0.002179</td>
+                                <td>-0.746384</td>
+                            </tr>
+                            <tr>
+                                <td>0.001641</td>
+                                <td>0.998897</td>
+                                <td>-0.034561</td>
+                            </tr>
+                            <tr>
+                                <td>-0.000589</td>
+                                <td>0.000001</td>
+                                <td>1.000000</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="matrix-label">H₃ (Image Pair 2: IMG3 → IMG2.5)</div>
+                    <div class="matrix">
+                        <table>
+                            <tr>
+                                <td>0.680217</td>
+                                <td>-0.038144</td>
+                                <td>944.466899</td>
+                            </tr>
+                            <tr>
+                                <td>-0.195307</td>
+                                <td>0.821391</td>
+                                <td>464.882893</td>
+                            </tr>
+                            <tr>
+                                <td>-0.000090</td>
+                                <td>-0.000017</td>
+                                <td>1.000000</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <section>
+            <h2>A.3: Warp the Images</h2>
+            <p>I implemented image rectification to test my warping functions. Using inverse warping, I map output pixels back to the source image with nearest neighbor and bilinear.</p>
+
+            <h3>Rectification Example 1</h3>
+            <div class="images">
+                <div class="img-container">
+                    <img src="images/a3/rect_original.jpg" alt="Original with selected region">
+                    <p>Original with Selected Region</p>
+                </div>
+                <div class="img-container">
+                    <img src="images/a3/rect_nn.jpg" alt="Nearest neighbor rectified">
+                    <p>Rectified - Nearest Neighbor</p>
+                </div>
+                <div class="img-container">
+                    <img src="images/a3/rect_bilinear.jpg" alt="Bilinear rectified">
+                    <p>Rectified - Bilinear</p>
+                </div>
+            </div>
+
+            <h3>Rectification Example 2</h3>
+            <div class="images">
+                <div class="img-container">
+                    <img src="images/a3/rect2_original.jpg" alt="Original with selected region">
+                    <p>Original with Selected Region</p>
+                </div>
+                <div class="img-container">
+                    <img src="images/a3/rect2_nn.jpg" alt="Nearest neighbor rectified">
+                    <p>Rectified - Nearest Neighbor</p>
+                </div>
+                <div class="img-container">
+                    <img src="images/a3/rect2_bilinear.jpg" alt="Bilinear rectified">
+                    <p>Rectified - Bilinear</p>
+                </div>
+            </div>
+
+            <h3>Rectification Example 3</h3>
+            <div class="images">
+                <div class="img-container">
+                    <img src="images/a3/rect3_original.jpg" alt="Original with selected region">
+                    <p>Original with Selected Region</p>
+                </div>
+                <div class="img-container">
+                    <img src="images/a3/rect3_nn.jpg" alt="Nearest neighbor rectified">
+                    <p>Rectified - Nearest Neighbor</p>
+                </div>
+                <div class="img-container">
+                    <img src="images/a3/rect3_bilinear.jpg" alt="Bilinear rectified">
+                    <p>Rectified - Bilinear</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>A.4: Blend the Images into a Mosaic</h2>
+            <p>For this part I blend warped images using weighted averaging with alpha masks. Each image gets a weight mask with linear falloff from center to edges. In overlapping regions, pixels are combined as (im1×α1 + im2×α2) / (α1 + α2), to make a smooth blend. Initialy, I used a weighted average of 1/2 for the overlapping region, but there was a sharp line and it just didn't look good at all. Also I'm pretty sure I messed up my point selection because it's a little bit blurry but I just found it so hard to get accurate selections</p>
+
+            <h3>Mosaic Example 1</h3>
+            <div class="images">
+                <div class="img-container">
+                    <img src="images/a4/mosaic1_src1.jpg" alt="Source 1">
+                    <p>Source Image 1</p>
+                </div>
+                <div class="img-container">
+                    <img src="images/a4/mosaic1_src2.jpg" alt="Source 2">
+                    <p>Source Image 2</p>
+                </div>
+            </div>
+            <div class="images">
+                <div class="img-container" style="max-width: 90%;">
+                    <img src="images/a4/mosaic2.jpg" alt="Mosaic 1">
+                    <p>Final Mosaic with Weighted Blending</p>
+                </div>
+            </div>
+
+            <h3>Mosaic Example 2</h3>
+            <div class="images">
+                <div class="img-container">
+                    <img src="images/a4/mosaic3_src1.jpg" alt="Source 1">
+                    <p>Source Image 1</p>
+                </div>
+                <div class="img-container">
+                    <img src="images/a4/mosaic3_src2.jpg" alt="Source 2">
+                    <p>Source Image 2</p>
+                </div>
+            </div>
+            <div class="images">
+                <div class="img-container" style="max-width: 90%;">
+                    <img src="images/a4/mosaic3.jpg" alt="Mosaic 3">
+                    <p>Final Mosaic with Weighted Blending</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Part B: Feature Detection and Automatic Matching</h2>
+
+            <h3>B.1: Harris Corner Detection</h3>
+            <p>These are the Harris corners with and without ANMS</p>
+
+            <div class="images">
+                <div class="img-container">
+                    <img src="images/b1/strongest_500.jpg" alt="Strongest 500 corners">
+                    <p>500 Strongest Corners (No ANMS)</p>
+                </div>
+                <div class="img-container">
+                    <img src="images/b1/anms_500.jpg" alt="ANMS 500 corners">
+                    <p>500 ANMS Corners</p>
+                </div>
+            </div>
+
+    
+            <h3>B.2: Feature Descriptor Extraction</h3>
+            <p>For each corner, I extracted a 40×40 patch around it, blurred it, then sampled an 8×8 descriptor. These get normalized to help with matching.</p>
+
+            <h4>Sample 8×8 Descriptors</h4>
+            <div class="images" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; max-width: 800px; margin: 0 auto;">
+                <div class="img-container">
+                    <img src="images/b2/descriptor_1.jpg" alt="Descriptor 1">
+                    <p>Descriptor 1</p>
+                </div>
+                <div class="img-container">
+                    <img src="images/b2/descriptor_2.jpg" alt="Descriptor 2">
+                    <p>Descriptor 2</p>
+                </div>
+                <div class="img-container">
+                    <img src="images/b2/descriptor_3.jpg" alt="Descriptor 3">
+                    <p>Descriptor 3</p>
+                </div>
+                <div class="img-container">
+                    <img src="images/b2/descriptor_4.jpg" alt="Descriptor 4">
+                    <p>Descriptor 4</p>
+                </div>
+                <div class="img-container">
+                    <img src="images/b2/descriptor_5.jpg" alt="Descriptor 5">
+                    <p>Descriptor 5</p>
+                </div>
+                <div class="img-container">
+                    <img src="images/b2/descriptor_6.jpg" alt="Descriptor 6">
+                    <p>Descriptor 6</p>
+                </div>
+                <div class="img-container">
+                    <img src="images/b2/descriptor_7.jpg" alt="Descriptor 7">
+                    <p>Descriptor 7</p>
+                </div>
+                <div class="img-container">
+                    <img src="images/b2/descriptor_8.jpg" alt="Descriptor 8">
+                    <p>Descriptor 8</p>
+                </div>
+            </div>
+        </section>
+
+            <h3>B.3: Feature Matching</h3>
+            <p>I matched features between images using Lowe's ratio test. For each descriptor, I found its two closest matches and only kept it if the best match was significantly better than the second-best (ratio < 0.75).</p>
+
+            <div class="images">
+                <div class="img-container" style="max-width: 100%;">
+                    <img src="images/b3/output.png" alt="Feature matches visualization">
+                    <p>Feature Matches</p>
+                </div>
+            </div>
+
+        </section>
+
+        <section>
+            <h3>B.4: RANSAC</h3>
+            <p>I estimate homographies with 4-point RANSAC: repeatedly sample 4 correspondences, compute H, count inliers within a threshold distance, then recompute H using all inliers. After many iterations, I use the best H to warp and blend images into automatic panoramas.
+                This is a funny observation but I realized I suck at point selection (my part A mosaics were a bit blurry)
+            </p>
+
+            <h4>Automatic Mosaics</h4>
+
+            <div class="images">
+                <div class="img-container" style="max-width: 90%;">
+                    <img src="images/b4/mosaic1.png" alt="Automatic Mosaic 1">
+                    <p>Automatic Mosaic 1</p>
+                </div>
+            </div>
+
+            <div class="images">
+                <div class="img-container" style="max-width: 90%;">
+                    <img src="images/b4/mosaic2.png" alt="Automatic Mosaic 2">
+                    <p>Automatic Mosaic 2</p>
+                </div>
+            </div>
+
+            <div class="images">
+                <div class="img-container" style="max-width: 90%;">
+                    <img src="images/b4/mosaic3.png" alt="Automatic Mosaic 3">
+                    <p>Automatic Mosaic 3</p>
+                </div>
+            </div>
+
+            <p>The automatic mosaics look pretty similar to the manual ones from Part A. RANSAC typically kept about half of the initial matches as inliers. The automatic approach is nice because it doesn't need manual clicking and handles outliers well.</p>
+        </section>
+    </main>
+</body>
+</html>

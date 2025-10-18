@@ -1,0 +1,164 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #f5f5f5;
+}
+
+header {
+    background: #003262;
+    color: white;
+    padding: 30px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+header img {
+    max-width: 250px;
+    background: white;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+header h1 {
+    margin: 10px 0;
+}
+
+header p {
+    margin: 5px 0;
+}
+
+main {
+    background: white;
+    padding: 30px;
+}
+
+section {
+    margin-bottom: 50px;
+}
+
+h2 {
+    color: #003262;
+    border-bottom: 2px solid #FDB515;
+    padding-bottom: 5px;
+    margin-bottom: 20px;
+}
+
+h3 {
+    color: #003262;
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+.images {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+
+.img-container {
+    flex: 1;
+    min-width: 40%;
+    text-align: center;
+}
+
+.img-container img {
+    width: 100%;
+    height: auto;
+}
+
+.img-container p {
+    margin-top: 8px;
+    font-style: italic;
+    color: #666;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Matrix display styles */
+.matrix-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.matrix {
+    display: inline-block;
+    position: relative;
+    padding: 10px 20px;
+    background: #f8f8f8;
+    border-radius: 5px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+}
+
+.matrix::before {
+    content: '[';
+    position: absolute;
+    left: 5px;
+    top: 0;
+    bottom: 0;
+    font-size: 60px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+}
+
+.matrix::after {
+    content: ']';
+    position: absolute;
+    right: 5px;
+    top: 0;
+    bottom: 0;
+    font-size: 60px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+}
+
+.matrix table {
+    margin: 0;
+    border-spacing: 10px 5px;
+}
+
+.matrix td {
+    text-align: right;
+    padding: 2px 8px;
+    min-width: 80px;
+    white-space: nowrap;
+}
+
+/* Smaller font matrices */
+.matrix[style*="font-size: 12px"] td {
+    padding: 2px 4px;
+    min-width: 50px;
+}
+
+.matrix-label {
+    font-weight: bold;
+    color: #003262;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.equation {
+    background: #f8f8f8;
+    padding: 15px;
+    border-left: 3px solid #FDB515;
+    margin: 20px 0;
+    font-family: 'Courier New', monospace;
+}
+
+.math-text {
+    line-height: 1.8;
+    margin: 15px 0;
+}
