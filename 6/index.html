@@ -559,8 +559,6 @@
         <figcaption>Gaussian Blur (t=750)</figcaption>
       </figure>
     </div>
-
-    <p>Gaussian blur fails to recover the original image structure. While it removes some high-frequency noise, it cannot distinguish between noise and actual image content, resulting in blurry outputs that lose important details.</p>
   </section>
 
   <!-- ============================================
@@ -570,11 +568,8 @@
     <h3>1.3 One-Step Denoising</h3>
 
     <div class="section-description">
-      <p>Here I use the pretrained UNet to estimate the noise in a single step. The model predicts the noise ε, and I recover the clean image using x₀ = (xₜ - √(1-ᾱₜ)·ε) / √ᾱₜ. It works okay for low noise levels like t=250, but at higher noise levels the results get pretty bad - the model just wasn't trained to handle that much noise all at once.</p>
+      <p>Here I use the pretrained unet to estimate the noise in a single step. The model predicts the noise epsilon, and I recover the clean image. It works okay for low noise levels like t=250, but at higher noise levels the results get worse</p>
     </div>
-
-    <h4>Results: One-Step Denoising</h4>
-    <p>For each timestep, we show the original image, the noisy image (from the forward process), and the one-step denoised estimate:</p>
 
     <h4>t = 250</h4>
     <div class="image-grid cols-3-large">
@@ -623,8 +618,6 @@
         <figcaption>One-Step Denoised</figcaption>
       </figure>
     </div>
-
-    <p>The one-step denoising works reasonably well at lower noise levels (t=250), but struggles to fully recover the image at higher noise levels (t=500, 750). This is because a single denoising step cannot accurately remove large amounts of noise—the model was trained to remove small amounts of noise iteratively.</p>
   </section>
 
   <!-- ============================================
@@ -634,7 +627,7 @@
     <h3>1.4 Iterative Denoising</h3>
 
     <div class="section-description">
-      <p>This is where things get interesting. Instead of trying to remove all noise at once, I implemented iterative denoising with strided timesteps (starting at t=990, stepping by 30). By gradually removing noise over many steps, the results are way better than one-step denoising. You can watch the image slowly emerge from the noise - it's pretty cool to see.</p>
+      <p>This is where things get interesting. Instead of removing all noise in one shot, I implemented iterative denoising with strided timesteps. In doing this, the results are way better than one step denoising.</p>
     </div>
 
     <h4>Denoising Progression (Every 5th Step)</h4>
@@ -681,7 +674,7 @@
       </figure>
     </div>
 
-    <p>Iterative denoising produces significantly better results than one-step denoising or Gaussian blur. By gradually removing noise over many steps, the model can accurately reconstruct the original image structure.</p>
+    <p>Iterative denoising outputs the best results in this comparison.</p>
   </section>
 
   <!-- ============================================
@@ -691,7 +684,7 @@
     <h3>1.5 Diffusion Model Sampling</h3>
 
     <div class="section-description">
-      <p>Now for the fun part - generating images from pure noise! I start with random Gaussian noise and run the iterative denoising loop to produce brand new images. The model basically hallucinates images from what it learned about natural photos. The results are a bit hit or miss without guidance, but it's still impressive that coherent images emerge from random static.</p>
+      <p>I start with random Gaussian noise and run the iterative denoising loop to produce new images</p>
     </div>
 
     <h4>Results: 5 Sampled Images</h4>
@@ -726,7 +719,7 @@
     <h3>1.6 Classifier-Free Guidance (CFG)</h3>
 
     <div class="section-description">
-      <p>Classifier-Free Guidance is a game changer. The idea is to combine conditional and unconditional noise estimates using ε = εᵤ + γ(εc - εᵤ). With γ=7, the model really locks onto the text prompt and produces much sharper, more coherent images. Compare these to the samples from 1.5 - the difference is night and day.</p>
+      <p>CFG is a massive improvement from above. The idea is to combine conditional and unconditional noise estimates. The model produces much sharper and just overall better images.</p>
     </div>
 
     <h4>Results: 5 Sampled Images with CFG (γ = 7)</h4>
@@ -761,7 +754,7 @@
     <h3>1.7 Image-to-image Translation</h3>
 
     <div class="section-description">
-      <p>SDEdit lets us edit real images by adding noise and then denoising. The key parameter is i_start - lower values add more noise allowing bigger changes, while higher values preserve more of the original. You can see at i_start=1 the images are completely different, but by i_start=20 they look almost identical to the original. It's a nice way to control the strength of the edit.</p>
+      <p>SDEdit lets us edit real images by adding noise and then denoising. Lower values add more noise allowing bigger changes to the image, while higher values preserve more of the original. You can see at i_start=1 the images are completely different, but by i_start=20 they look almost identical to the original.</p>
     </div>
 
     <h4>Campanile Edits at Different Noise Levels</h4>
@@ -868,7 +861,7 @@
     <h3>1.7.1 Editing Hand-Drawn and Web Images</h3>
 
     <div class="section-description">
-      <p>This is where SDEdit gets really fun - I applied it to hand-drawn sketches and random web images. The model tries to make them look like real photos while keeping the basic structure. The stick figures turn into actual people, and my rough sketches get filled in with realistic details. Lower i_start values give wilder interpretations, while higher values stay closer to the original drawing.</p>
+      <p> I applied SDEdit to hand-drawn sketches (code was provided in colab for the drawing) and a random web image of some stick figures. It was really cool seeing the model absolutely cook on the outputs.</p>
     </div>
 
     <h4>Web Image: Stick Figures</h4>
@@ -935,7 +928,7 @@
       </figure>
     </div>
 
-    <h4>Hand-Drawn Image 2: Rocket</h4>
+    <h4>Hand-Drawn Image 2: House</h4>
     <div class="image-grid cols-3-large">
       <figure>
         <img src="images/Unknown-86.png" alt="i_start=1">
@@ -975,7 +968,7 @@
     <h3>1.7.2 Inpainting</h3>
 
     <div class="section-description">
-      <p>For inpainting, I implemented the RePaint approach where we fill in masked regions while keeping the rest of the image intact. The trick is that at each denoising step, I replace pixels outside the mask with the appropriately-noised original image. This forces the model to generate content that blends seamlessly with the surroundings.</p>
+      <p>For inpainting, we fill in masked regions while keeping the rest of the image intact. At each denoising step, I replace pixels outside the mask with the noised original image. In doing this, we can see the model generate content that blends with the surroundings. The big game picture honestly was pretty troll, I was pretty curious on the outputs and it didn't dissapoint. For the dog one the output was really cool in the sense where the model almost flipped the image.</p>
     </div>
 
     <h4>Campanile Inpainting</h4>
@@ -1034,7 +1027,7 @@
     <h3>1.7.3 Text-Conditional Image-to-image Translation</h3>
 
     <div class="section-description">
-      <p>Here I combine SDEdit with text prompts to guide what the output looks like. Instead of just projecting to a generic "photo", I can tell it to make "a rocket ship" and watch the Campanile transform into a rocket. The lower i_start values create more dramatic transformations while higher values keep more of the original structure but with rocket-like features.</p>
+      <p>In this part we combine the earlier sdedit with text prompts to shape the output. It was really cool to see the campanile transform into a rocket. As the i_start values increases, we'd keep the original structure but sort of looking like a rocket. The stanford picture was funny as it made a rocket where their name was.</p>
     </div>
 
     <h4>Campanile with Text Prompt: "a rocket ship"</h4>
@@ -1141,7 +1134,7 @@
     <h3>1.8 Visual Anagrams</h3>
 
     <div class="section-description">
-      <p>Visual anagrams are super cool - they're images that look like one thing right-side up and something completely different when flipped. I compute noise estimates for both orientations and average them, so the denoising has to satisfy both prompts at once. The old man/campfire one works especially well - you can clearly see both interpretations depending on how you look at it.</p>
+      <p>Visual anagrams are dope, they look like one thing and something different when flipped. I compute noise estimates for both orientations and average them, so the denoising has to satisfy both prompts at once. The old man // campfire one works especially well as we can  see both interpretations depending on the way we look at it</p>
     </div>
 
     <h4>Visual Anagram 1: Old Man / Campfire</h4>
@@ -1194,22 +1187,22 @@
     <h3>1.9 Hybrid Images</h3>
 
     <div class="section-description">
-      <p>Finally, I made hybrid images using the same frequency-based trick from earlier in the course - but now applied during diffusion! I take low frequencies from one noise estimate and high frequencies from another, so up close you see one image and from far away you see something else. Try squinting at the skull/waterfall one - the skull really pops out when you blur your vision.</p>
+      <p>Similar to project 3, we make hybrid images again but using diffusion here. I take low frequencies from one noise estimate and high frequencies from another, so from close you see one image and from far away you see something else. Try squinting at any of the images below!</p>
     </div>
 
     <h4>Hybrid Image 1: Skull + Waterfall</h4>
     <p><strong>Low-frequency prompt:</strong> "a skull"</p>
     <p><strong>High-frequency prompt:</strong> "a waterfall"</p>
-    <figure style="text-align: center; margin: 20px 0;">
-      <img src="images/Unknown-129.png" alt="Hybrid skull and waterfall" style="width: 700px; max-width: 100%;">
+    <figure class="result-image">
+      <img src="images/Unknown-129.png" alt="Hybrid skull and waterfall">
       <figcaption>Hybrid: "a skull" (low freq) + "a waterfall" (high freq)</figcaption>
     </figure>
 
     <h4>Hybrid Image 2: Old Man + Campfire</h4>
     <p><strong>Low-frequency prompt:</strong> "an oil painting of an old man"</p>
     <p><strong>High-frequency prompt:</strong> "an oil painting of a campfire"</p>
-    <figure style="text-align: center; margin: 20px 0;">
-      <img src="images/Unknown-130.png" alt="Hybrid old man and campfire" style="width: 700px; max-width: 100%;">
+    <figure class="result-image">
+      <img src="images/Unknown-130.png" alt="Hybrid old man and campfire">
       <figcaption>Hybrid: "an oil painting of an old man" (low freq) + "an oil painting of a campfire" (high freq)</figcaption>
     </figure>
   </section>
@@ -1226,21 +1219,20 @@
     <h3>Part 1: Training a Single-Step Denoising UNet</h3>
 
     <div class="section-description">
-      <p>In this part, I built my own denoiser from scratch using a UNet architecture. The idea is simple: given a noisy image z = x + σε, train the network to predict the clean image x directly using MSE loss. It's a good starting point before getting into the more complex flow matching stuff.</p>
+      <p>In this part, I built my own denoiser using a UNet architecture</p>
     </div>
 
     <h4>1.2 Using the UNet to Train a Denoiser</h4>
-    <p>I trained the UNet on MNIST digits with a fixed noise level of σ = 0.5. The network learns to map noisy inputs to clean outputs by minimizing L2 loss. It's basically learning "what does a clean digit look like given this noisy version?"</p>
+    <p>I trained the Unet on MNIST digits. It maps noisy inputs to clean outputs by minimizing L2 loss.</p>
 
     <h5>Visualization of Noising Process</h5>
-    <p>Visualizing different noising processes over σ ∈ [0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 1.0]:</p>
     <figure class="result-image">
       <img src="images/Unknown-132.png" alt="Noising process visualization">
       <figcaption>MNIST digit at different noise levels</figcaption>
     </figure>
 
     <h5>1.2.1 Training</h5>
-    <p>I trained for 5 epochs with batch size 256 and learning rate 1e-4. The loss drops quickly in the first epoch and then gradually converges. You can see in the results that by epoch 5, the model does a decent job recovering the original digits from the noisy inputs.</p>
+    <p>I trained for 5 epochs, and we can see the loss drops quickly in the first epoch and then converges. We can see in the results that by epoch 5, the model does a pretty solid job on recovering the original digits from the noisy inputs.</p>
     <figure class="result-image">
       <img src="images/Unknown-133.png" alt="Training loss curve">
       <figcaption>Training loss over iterations</figcaption>
@@ -1253,14 +1245,14 @@
     </figure>
 
     <h5>1.2.2 Out-of-Distribution Testing</h5>
-    <p>Here I tested the denoiser on noise levels it wasn't trained on. Unsurprisingly, it struggles with σ values far from 0.5 - it does okay near the training noise level but gets worse the further you go. This shows why we need a more flexible approach that can handle any noise level.</p>
+    <p>Here I tested the denoiser on noise levels it wasn't trained on. It struggled a lot and it does okay near the training noise level but gets worse the more it increases.</p>
     <figure class="result-image">
       <img src="images/Unknown-135.png" alt="Out-of-distribution test results">
       <figcaption>Denoising performance on different noise levels</figcaption>
     </figure>
 
     <h5>1.2.3 Denoising Pure Noise</h5>
-    <p>What happens if we try to denoise pure noise? I trained a separate model on σ = 1.0. Since there's literally no signal in the input, the MSE loss pushes the model to output the "average" of all training digits - resulting in blurry blobs that look like a mix of 0-9. This is an interesting failure case that motivates iterative approaches.</p>
+    <p>For this part, we train the model with input images of noise, which results in blurry characters which you can sort of make out to be numbers 0-9 (looks like 3) but not really.</p>
     <figure class="result-image">
       <img src="images/Unknown-136.png" alt="Training loss curve for pure noise">
       <figcaption>Training loss over iterations</figcaption>
@@ -1306,7 +1298,6 @@
       </figure>
     </div>
 
-    <p><strong>Observations:</strong> The outputs converge to a blurry average of all training digits. With MSE loss, the model learns to predict the centroid that minimizes squared distances to all training examples. Since the input is pure noise with no digit-specific information, the model outputs the "average digit" - a blend of all 0-9 digits, which appears as a blurry blob.</p>
   </section>
 
   <!-- ============================================
@@ -1316,18 +1307,18 @@
     <h3>Part 2: Training a Flow Matching Model</h3>
 
     <div class="section-description">
-      <p>Now for flow matching - instead of predicting the clean image directly, I train the UNet to predict the "velocity" v = x₁ - z that points from noisy to clean. Then I can integrate this velocity field over time to gradually denoise. This is more flexible than the one-step approach and can handle generating images from pure noise.</p>
+      <p>We now do flow matching. Also I want to note that I didn't include a part for 2.1 and 2.4 as there was no real deliverable even tho I did the parts. Instead of predicting the clean image directly, I train the UNet to predict the velocity // flow from a noisy to clean photo. From this I can denoise. </p>
     </div>
 
     <h4>2.2 Training the Time-Conditioned UNet</h4>
-    <p>I added time conditioning using FCBlocks that modulate the UNet features based on the current timestep t. The model learns v(xₜ, t) where xₜ interpolates between noise and data. This way the network knows "how far along" in the denoising process it is.</p>
+    <p>Our next step, this part, is to train our UNet. I added time conditioning using FCBlocks based on the current timestep t. We randomly pick a training image and timestep (0 - 1), add noise, and then train to predict the flow/velocity at that given timestep</p>
     <figure class="result-image">
       <img src="images/Unknown-137.png" alt="Training loss curve for time-conditioned UNet">
       <figcaption>Training loss over iterations</figcaption>
     </figure>
 
     <h4>2.3 Sampling from the Time-Conditioned UNet</h4>
-    <p>To generate images, I integrate the learned flow from t=0 to t=1 using Euler steps. Starting from pure noise, I repeatedly apply x_{t+dt} = xₜ + dt·v(xₜ, t) until I get a clean image. You can see the samples improve a lot from epoch 1 to epoch 10 - the digits become much clearer and more recognizable.</p>
+    <p>To generate images, I implemented the sampling algorithm given to us in the spec. We can see the improvements by epoch 10, the 0 is recognizable in the end. </p>
     <div class="image-grid cols-3-large">
       <figure>
         <img src="images/Unknown-138.png" alt="Samples after Epoch 1">
@@ -1344,14 +1335,14 @@
     </div>
 
     <h4>2.5 Training the Class-Conditioned UNet</h4>
-    <p>To control what digit gets generated, I added class conditioning to the UNet. The key trick is dropping the class label randomly (p=0.1) during training - this lets us use classifier-free guidance at sampling time to get sharper, more recognizable digits.</p>
+    <p>To control what digit gets generated, I added class conditioning to the UNet. Essentially, just imeplemented the algorithm on the spec. The key thing is dropping the class label randomly during training. This is important because it  lets us get sharper // more recognizable numbers.</p>
     <figure class="result-image">
       <img src="images/Unknown-145.png" alt="Training loss curve for class-conditioned UNet">
       <figcaption>Training loss over iterations</figcaption>
     </figure>
 
     <h4>2.6 Sampling from the Class-Conditioned UNet</h4>
-    <p>For sampling, I use CFG with γ=5: v = v_uncond + γ(v_cond - v_uncond). This amplifies the class signal so the generated digits are cleaner and actually look like the target class. The improvement from epoch 1 to epoch 10 is pretty dramatic - by the end you can clearly tell what digit each sample is supposed to be.</p>
+    <p>For sampling, I use CFG, which improves the class signal, (algorithm on spec). THis makes the generated digits much cleaner and makes it actually look like the target class. The improvement from epoch 1 to epoch 10 is pretty crazy. In epoch 10, all of the digits are recognizable (at least to me). I mean honestly even on epoch 1 I could tell but its just much more crisp.</p>
     <div class="image-grid cols-3-large">
       <figure>
         <img src="images/Unknown-142.png" alt="Epoch 1 samples">
@@ -1368,7 +1359,7 @@
     </div>
 
     <h5>Training without Learning Rate Scheduler</h5>
-    <p>As a bonus, I also tried training without the learning rate scheduler. To compensate for not having the exponential decay (gamma=0.95), I just used a lower constant learning rate of 1e-3 instead of 1e-2. The results are pretty similar - turns out you can get away without the fancy scheduling if you pick a good constant rate.</p>
+    <p>I tried training without the learning rate scheduler. To make up for it I lowered the constant learning rate and got pretty similar results.</p>
     <div class="image-grid cols-3-large">
       <figure>
         <img src="images/Unknown-146.png" alt="No scheduler - Epoch 1">
@@ -1385,16 +1376,6 @@
     </div>
   </section>
 
-  <!-- ============================================
-       FOOTER
-       ============================================ -->
-  <footer>
-    <p>CS180: Intro to Computer Vision and Computational Photography</p>
-    <p>University of California, Berkeley | Fall 2025</p>
-    <p style="margin-top: 15px; font-size: 0.85em; color: #999;">
-      This project was a joint effort by Daniel Geng, Ryan Tabrizi, Hang Gao, Jingfeng Yang, and Jameson Crate, advised by Liyue Shen, Andrew Owens, and Alexei Efros.
-    </p>
-  </footer>
 
 </body>
 </html>
