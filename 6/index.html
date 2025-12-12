@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CS180 Project 5A: The Power of Diffusion Models</title>
+  <style>
+    /* ============================================
+       BASE STYLES
+       ============================================ */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      line-height: 1.7;
+      color: #333;
+      background: #fff;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px 40px;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      color: #003262; /* Berkeley Blue */
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      text-align: center;
+      border-bottom: 3px solid #FDB515; /* Berkeley Gold */
+      padding-bottom: 15px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 1.6em;
+      border-bottom: 2px solid #003262;
+      padding-bottom: 8px;
+      margin-top: 2em;
+    }
+
+    h3 {
+      font-size: 1.3em;
+      color: #004080;
+    }
+
+    h4 {
+      font-size: 1.1em;
+      color: #555;
+    }
+
+    p {
+      margin: 1em 0;
+      text-align: justify;
+    }
+
+    a {
+      color: #003262;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+      color: #FDB515;
+    }
+
+    /* ============================================
+       HEADER
+       ============================================ */
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header .course-info {
+      font-size: 1.1em;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .header .subtitle {
+      font-size: 1.3em;
+      color: #004080;
+      font-style: italic;
+      margin: 10px 0;
+    }
+
+    .header .student-info {
+      font-size: 1em;
+      color: #333;
+      margin-top: 15px;
+    }
+
+    /* ============================================
+       NAVIGATION / TABLE OF CONTENTS
+       ============================================ */
+    .toc {
+      background: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px 30px;
+      margin: 30px 0;
+    }
+
+    .toc h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      color: #003262;
+    }
+
+    .toc ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .toc li {
+      margin: 8px 0;
+    }
+
+    .toc li ul {
+      padding-left: 20px;
+      margin-top: 5px;
+    }
+
+    .toc a {
+      color: #004080;
+    }
+
+    /* ============================================
+       IMAGE GRIDS
+       ============================================ */
+    .image-grid {
+      display: grid;
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .image-grid.cols-2 {
+      grid-template-columns: repeat(2, 1fr);
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .image-grid.cols-2 figure img {
+      min-width: 300px;
+    }
+    .image-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .image-grid.cols-3-large {
+      grid-template-columns: repeat(3, 1fr);
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .image-grid.cols-3-large figure img {
+      min-width: 250px;
+    }
+    .image-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+    .image-grid.cols-5 { grid-template-columns: repeat(5, 1fr); }
+    .image-grid.cols-6 { grid-template-columns: repeat(6, 1fr); }
+
+    @media (max-width: 768px) {
+      .image-grid.cols-4,
+      .image-grid.cols-5,
+      .image-grid.cols-6 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .image-grid.cols-3 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* ============================================
+       FIGURES AND IMAGES
+       ============================================ */
+    figure {
+      margin: 0;
+      text-align: center;
+    }
+
+    figure img {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    figcaption {
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 8px;
+      font-style: italic;
+    }
+
+    .result-image {
+      margin: 20px auto;
+      max-width: 800px;
+    }
+
+    .result-image.code-screenshot {
+      max-width: 100%;
+    }
+
+    /* ============================================
+       PLACEHOLDERS
+       ============================================ */
+    .placeholder {
+      border: 2px dashed #999;
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 40px 20px;
+      text-align: center;
+      color: #777;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      margin: 15px 0;
+    }
+
+    .placeholder.code {
+      background: #2d2d2d;
+      border-color: #555;
+      color: #aaa;
+      font-family: 'Monaco', 'Consolas', monospace;
+      min-height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .placeholder.image {
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .placeholder.image-small {
+      min-height: 120px;
+    }
+
+    .placeholder-text {
+      font-size: 0.95em;
+    }
+
+    /* ============================================
+       COMPARISON ROWS
+       ============================================ */
+    .comparison-row {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    .comparison-row figure {
+      flex: 1;
+      min-width: 150px;
+      max-width: 250px;
+    }
+
+    /* ============================================
+       SECTIONS
+       ============================================ */
+    section {
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #eee;
+    }
+
+    section:last-of-type {
+      border-bottom: none;
+    }
+
+    .section-description {
+      background: #f0f7ff;
+      border-left: 4px solid #003262;
+      padding: 15px 20px;
+      margin: 15px 0;
+      font-size: 0.95em;
+    }
+
+    .deliverables {
+      background: #fff8e6;
+      border-left: 4px solid #FDB515;
+      padding: 15px 20px;
+      margin: 15px 0;
+    }
+
+    .deliverables h4 {
+      margin-top: 0;
+      color: #996600;
+    }
+
+    .deliverables ul {
+      margin: 10px 0 0 20px;
+    }
+
+    /* ============================================
+       CODE BLOCKS
+       ============================================ */
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.9em;
+    }
+
+    pre {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.85em;
+      line-height: 1.5;
+    }
+
+    /* ============================================
+       MATH / EQUATIONS
+       ============================================ */
+    .equation {
+      text-align: center;
+      margin: 20px 0;
+      font-style: italic;
+      color: #333;
+    }
+
+    /* ============================================
+       FOOTER
+       ============================================ */
+    footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 2px solid #003262;
+      text-align: center;
+      font-size: 0.9em;
+      color: #666;
+    }
+
+    /* ============================================
+       PRINT STYLES
+       ============================================ */
+    @media print {
+      body {
+        max-width: 100%;
+        padding: 0;
+      }
+      .toc {
+        page-break-after: always;
+      }
+      section {
+        page-break-inside: avoid;
+      }
+      .placeholder {
+        border-style: solid;
+      }
+    }
+
+    /* ============================================
+       ANALYSIS BOX
+       ============================================ */
+    .analysis {
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px 20px;
+      margin: 15px 0;
+    }
+
+    .analysis h4 {
+      margin-top: 0;
+      color: #003262;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================
+       HEADER
+       ============================================ -->
+  <header class="header">
+    <p class="course-info">CS180: Intro to Computer Vision and Computational Photography</p>
+    <p class="course-info">University of California, Berkeley</p>
+    <h1>Project 5A: The Power of Diffusion Models!</h1>
+    <p class="subtitle">Exploring Diffusion Models for Image Generation and Editing</p>
+    <p class="student-info">
+      <strong>Name:</strong> Etai Abukasis
+    </p>
+  </header>
+
+  <!-- ============================================
+       TABLE OF CONTENTS
+       ============================================ -->
+  <nav class="toc">
+    <h3>Table of Contents</h3>
+    <ul>
+      <li><a href="#part0">Part 0: Setup</a></li>
+      <li><a href="#part1">Part 1: Sampling Loops</a>
+        <ul>
+          <li><a href="#part1-1">1.1 Implementing the Forward Process</a></li>
+          <li><a href="#part1-2">1.2 Classical Denoising</a></li>
+          <li><a href="#part1-3">1.3 One-Step Denoising</a></li>
+          <li><a href="#part1-4">1.4 Iterative Denoising</a></li>
+          <li><a href="#part1-5">1.5 Diffusion Model Sampling</a></li>
+          <li><a href="#part1-6">1.6 Classifier-Free Guidance (CFG)</a></li>
+          <li><a href="#part1-7">1.7 Image-to-image Translation</a></li>
+          <li><a href="#part1-7-1">1.7.1 Editing Hand-Drawn and Web Images</a></li>
+          <li><a href="#part1-7-2">1.7.2 Inpainting</a></li>
+          <li><a href="#part1-7-3">1.7.3 Text-Conditional Image-to-image Translation</a></li>
+          <li><a href="#part1-8">1.8 Visual Anagrams</a></li>
+          <li><a href="#part1-9">1.9 Hybrid Images</a></li>
+        </ul>
+      </li>
+      <li><a href="#part5b">Part 5B: Flow Matching from Scratch!</a>
+        <ul>
+          <li><a href="#part5b-1">Part 1: Training a Single-Step Denoising UNet</a></li>
+          <li><a href="#part5b-2">Part 2: Training a Flow Matching Model</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- ============================================
+       PART 0: SETUP
+       ============================================ -->
+  <section id="part0">
+    <h2>Part 0: Setup</h2>
+
+    <div class="section-description">
+      <p>Here I play around with different prompts using the DeepFloyd IF diffusion model and compare 20 vs 120 inference steps. I use a random seed of 67 (dead meme). The 120-step images have noticeably more detail. We can see sharper textures and more coherent structures compared to the 20 step versions.</p>
+    </div>
+
+    <h3>Custom Text Prompts and Generated Images</h3>
+    <p>First row is 20 steps, second row is 120 steps for each prompt:</p>
+
+    <h4>Prompt 1: "an oil painting of a snowy mountain village"</h4>
+    <div class="image-grid cols-2">
+      <figure>
+        <img src="images/part0_s20_1.png" alt="Snowy mountain village with 20 steps">
+        <figcaption>20</figcaption>
+      </figure>
+      <figure>
+        <img src="images/part0_s120_1.png" alt="Snowy mountain village with 120 steps">
+        <figcaption>120</figcaption>
+      </figure>
+    </div>
+
+    <h4>Prompt 2: "a photo of the amalfi coast"</h4>
+    <div class="image-grid cols-2">
+      <figure>
+        <img src="images/part0_s20_2.png" alt="Amalfi coast with 20 steps">
+        <figcaption>20</figcaption>
+      </figure>
+      <figure>
+        <img src="images/part0_s120_2.png" alt="Amalfi coast with 120 steps">
+        <figcaption>120</figcaption>
+      </figure>
+    </div>
+
+    <h4>Prompt 3: "a photo of a man"</h4>
+    <div class="image-grid cols-2">
+      <figure>
+        <img src="images/part0_s20_3.png" alt="Photo of a man with 20 steps">
+        <figcaption>20</figcaption>
+      </figure>
+      <figure>
+        <img src="images/part0_s120_3.png" alt="Photo of a man with 120 steps">
+        <figcaption>120</figcaption>
+      </figure>
+    </div>
+
+    <div class="analysis">
+      <h4>Analysis</h4>
+      <p>Comparing the results, we see  that higher inference steps make more refined and detailed images. In the 20 step version the images are slightly more noisy. But, the 120 step version allows the diffusion model more iterations to denoise and refine the output. This ends up resulting in sharper details and better image quality.</p>
+    </div>
+  </section>
+
+  <!-- ============================================
+       PART 1: SAMPLING LOOPS
+       ============================================ -->
+  <section id="part1">
+    <h2>Part 1: Sampling Loops</h2>
+    <p>For part 1 I implemented various sampling loops using the pretrained DeepFloyd denoiser</p>
+  </section>
+
+  <!-- ============================================
+       PART 1.1: FORWARD PROCESS
+       ============================================ -->
+  <section id="part1-1">
+    <h3>1.1 Implementing the Forward Process</h3>
+
+    <div class="section-description">
+      <p>I implemented the forward noising process that gradually corrupts a clean image. I used the provided formula (on spec) that blends the original image with random Gaussian noise based on the timestep t. We can see how the Campanile slowly disappears into rainbow static as t increases</p>
+    </div>
+
+    <h4>Results: Noisy Campanile at Different Timesteps</h4>
+    <div class="image-grid cols-2">
+      <figure>
+        <img src="images/Unknown-7.png" alt="Original Campanile image">
+        <figcaption>Original Image (t = 0)</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-8.png" alt="Noisy image at t=250">
+        <figcaption>t = 250</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-9.png" alt="Noisy image at t=500">
+        <figcaption>t = 500</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-10.png" alt="Noisy image at t=750">
+        <figcaption>t = 750</figcaption>
+      </figure>
+    </div>
+
+  </section>
+
+  <!-- ============================================
+       PART 1.2: CLASSICAL DENOISING
+       ============================================ -->
+  <section id="part1-2">
+    <h3>1.2 Classical Denoising</h3>
+
+    <div class="section-description">
+      <p>First I tried the naive approach of using a Gaussian blur to remove noise. However, this doesn't work well at all because the blur just smears everything together and can't tell the difference between noise and actual edges in the image. The results are blurry and dont have too much details</p>
+    </div>
+
+    <h4>Results: Gaussian Blur Denoising</h4>
+    <div class="image-grid cols-2">
+      <figure>
+        <img src="images/Unknown-8.png" alt="Noisy image at t=250">
+        <figcaption>Noisy (t=250)</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-20.png" alt="Gaussian blur denoised t=250">
+        <figcaption>Gaussian Blur (t=250)</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-9.png" alt="Noisy image at t=500">
+        <figcaption>Noisy (t=500)</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-21.png" alt="Gaussian blur denoised t=500">
+        <figcaption>Gaussian Blur (t=500)</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-10.png" alt="Noisy image at t=750">
+        <figcaption>Noisy (t=750)</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-22.png" alt="Gaussian blur denoised t=750">
+        <figcaption>Gaussian Blur (t=750)</figcaption>
+      </figure>
+    </div>
+
+    <p>Gaussian blur fails to recover the original image structure. While it removes some high-frequency noise, it cannot distinguish between noise and actual image content, resulting in blurry outputs that lose important details.</p>
+  </section>
+
+  <!-- ============================================
+       PART 1.3: ONE-STEP DENOISING
+       ============================================ -->
+  <section id="part1-3">
+    <h3>1.3 One-Step Denoising</h3>
+
+    <div class="section-description">
+      <p>Here I use the pretrained UNet to estimate the noise in a single step. The model predicts the noise ε, and I recover the clean image using x₀ = (xₜ - √(1-ᾱₜ)·ε) / √ᾱₜ. It works okay for low noise levels like t=250, but at higher noise levels the results get pretty bad - the model just wasn't trained to handle that much noise all at once.</p>
+    </div>
+
+    <h4>Results: One-Step Denoising</h4>
+    <p>For each timestep, we show the original image, the noisy image (from the forward process), and the one-step denoised estimate:</p>
+
+    <h4>t = 250</h4>
+    <div class="image-grid cols-3-large">
+      <figure>
+        <img src="images/Unknown-7.png" alt="Original Campanile">
+        <figcaption>Original</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-8.png" alt="Noisy at t=250">
+        <figcaption>Noisy (t=250)</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-17.png" alt="One-step denoised t=250">
+        <figcaption>One-Step Denoised</figcaption>
+      </figure>
+    </div>
+
+    <h4>t = 500</h4>
+    <div class="image-grid cols-3-large">
+      <figure>
+        <img src="images/Unknown-7.png" alt="Original Campanile">
+        <figcaption>Original</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-9.png" alt="Noisy at t=500">
+        <figcaption>Noisy (t=500)</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-18.png" alt="One-step denoised t=500">
+        <figcaption>One-Step Denoised</figcaption>
+      </figure>
+    </div>
+
+    <h4>t = 750</h4>
+    <div class="image-grid cols-3-large">
+      <figure>
+        <img src="images/Unknown-7.png" alt="Original Campanile">
+        <figcaption>Original</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-10.png" alt="Noisy at t=750">
+        <figcaption>Noisy (t=750)</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-19.png" alt="One-step denoised t=750">
+        <figcaption>One-Step Denoised</figcaption>
+      </figure>
+    </div>
+
+    <p>The one-step denoising works reasonably well at lower noise levels (t=250), but struggles to fully recover the image at higher noise levels (t=500, 750). This is because a single denoising step cannot accurately remove large amounts of noise—the model was trained to remove small amounts of noise iteratively.</p>
+  </section>
+
+  <!-- ============================================
+       PART 1.4: ITERATIVE DENOISING
+       ============================================ -->
+  <section id="part1-4">
+    <h3>1.4 Iterative Denoising</h3>
+
+    <div class="section-description">
+      <p>This is where things get interesting. Instead of trying to remove all noise at once, I implemented iterative denoising with strided timesteps (starting at t=990, stepping by 30). By gradually removing noise over many steps, the results are way better than one-step denoising. You can watch the image slowly emerge from the noise - it's pretty cool to see.</p>
+    </div>
+
+    <h4>Denoising Progression (Every 5th Step)</h4>
+    <div class="image-grid cols-3-large">
+      <figure>
+        <img src="images/Unknown-39.png" alt="Denoising at t=660">
+        <figcaption>t=660</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-38.png" alt="Denoising at t=510">
+        <figcaption>t=510</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-37.png" alt="Denoising at t=360">
+        <figcaption>t=360</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-36.png" alt="Denoising at t=210">
+        <figcaption>t=210</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-35.png" alt="Denoising at t=60">
+        <figcaption>t=60</figcaption>
+      </figure>
+    </div>
+
+    <h4>Comparison: Iterative vs One-Step vs Gaussian Blur</h4>
+    <div class="image-grid cols-2">
+      <figure>
+        <img src="images/Unknown-31.png" alt="Original Campanile">
+        <figcaption>Original</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-32.png" alt="Iterative denoising result">
+        <figcaption>Iterative Denoising</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-33.png" alt="One-step denoising result">
+        <figcaption>One-Step Denoising</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-34.png" alt="Gaussian blur result">
+        <figcaption>Gaussian Blur</figcaption>
+      </figure>
+    </div>
+
+    <p>Iterative denoising produces significantly better results than one-step denoising or Gaussian blur. By gradually removing noise over many steps, the model can accurately reconstruct the original image structure.</p>
+  </section>
+
+  <!-- ============================================
+       PART 1.5: DIFFUSION MODEL SAMPLING
+       ============================================ -->
+  <section id="part1-5">
+    <h3>1.5 Diffusion Model Sampling</h3>
+
+    <div class="section-description">
+      <p>Now for the fun part - generating images from pure noise! I start with random Gaussian noise and run the iterative denoising loop to produce brand new images. The model basically hallucinates images from what it learned about natural photos. The results are a bit hit or miss without guidance, but it's still impressive that coherent images emerge from random static.</p>
+    </div>
+
+    <h4>Results: 5 Sampled Images</h4>
+    <div class="image-grid cols-3-large">
+      <figure>
+        <img src="images/Unknown-40.png" alt="Sample 1">
+        <figcaption>Sample 1</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-41.png" alt="Sample 2">
+        <figcaption>Sample 2</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-42.png" alt="Sample 3">
+        <figcaption>Sample 3</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-43.png" alt="Sample 4">
+        <figcaption>Sample 4</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-44.png" alt="Sample 5">
+        <figcaption>Sample 5</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============================================
+       PART 1.6: CFG
+       ============================================ -->
+  <section id="part1-6">
+    <h3>1.6 Classifier-Free Guidance (CFG)</h3>
+
+    <div class="section-description">
+      <p>Classifier-Free Guidance is a game changer. The idea is to combine conditional and unconditional noise estimates using ε = εᵤ + γ(εc - εᵤ). With γ=7, the model really locks onto the text prompt and produces much sharper, more coherent images. Compare these to the samples from 1.5 - the difference is night and day.</p>
+    </div>
+
+    <h4>Results: 5 Sampled Images with CFG (γ = 7)</h4>
+    <div class="image-grid cols-3-large">
+      <figure>
+        <img src="images/Unknown-45.png" alt="CFG Sample 1">
+        <figcaption>Sample 1</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-46.png" alt="CFG Sample 2">
+        <figcaption>Sample 2</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-47.png" alt="CFG Sample 3">
+        <figcaption>Sample 3</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-48.png" alt="CFG Sample 4">
+        <figcaption>Sample 4</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-49.png" alt="CFG Sample 5">
+        <figcaption>Sample 5</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============================================
+       PART 1.7: IMAGE-TO-IMAGE TRANSLATION
+       ============================================ -->
+  <section id="part1-7">
+    <h3>1.7 Image-to-image Translation</h3>
+
+    <div class="section-description">
+      <p>SDEdit lets us edit real images by adding noise and then denoising. The key parameter is i_start - lower values add more noise allowing bigger changes, while higher values preserve more of the original. You can see at i_start=1 the images are completely different, but by i_start=20 they look almost identical to the original. It's a nice way to control the strength of the edit.</p>
+    </div>
+
+    <h4>Campanile Edits at Different Noise Levels</h4>
+    <div class="image-grid cols-3-large">
+      <figure>
+        <img src="images/Unknown-50.png" alt="i_start=1">
+        <figcaption>i_start = 1</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-51.png" alt="i_start=3">
+        <figcaption>i_start = 3</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-52.png" alt="i_start=5">
+        <figcaption>i_start = 5</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-53.png" alt="i_start=7">
+        <figcaption>i_start = 7</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-54.png" alt="i_start=10">
+        <figcaption>i_start = 10</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-55.png" alt="i_start=20">
+        <figcaption>i_start = 20</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-56.png" alt="Original Campanile">
+        <figcaption>Original</figcaption>
+      </figure>
+    </div>
+
+    <h4>Custom Image 1</h4>
+    <div class="image-grid cols-3-large">
+      <figure>
+        <img src="images/Unknown-57.png" alt="i_start=1">
+        <figcaption>i_start = 1</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-58.png" alt="i_start=3">
+        <figcaption>i_start = 3</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-59.png" alt="i_start=5">
+        <figcaption>i_start = 5</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-60.png" alt="i_start=7">
+        <figcaption>i_start = 7</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-61.png" alt="i_start=10">
+        <figcaption>i_start = 10</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-62.png" alt="i_start=20">
+        <figcaption>i_start = 20</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-63.png" alt="Original">
+        <figcaption>Original</figcaption>
+      </figure>
+    </div>
+
+    <h4>Custom Image 2</h4>
+    <div class="image-grid cols-3-large">
+      <figure>
+        <img src="images/Unknown-64.png" alt="i_start=1">
+        <figcaption>i_start = 1</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-65.png" alt="i_start=3">
+        <figcaption>i_start = 3</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-66.png" alt="i_start=5">
+        <figcaption>i_start = 5</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-67.png" alt="i_start=7">
+        <figcaption>i_start = 7</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-68.png" alt="i_start=10">
+        <figcaption>i_start = 10</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-69.png" alt="i_start=20">
+        <figcaption>i_start = 20</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-70.png" alt="Original">
+        <figcaption>Original</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============================================
+       PART 1.7.1: HAND-DRAWN AND WEB IMAGES
+       ============================================ -->
+  <section id="part1-7-1">
+    <h3>1.7.1 Editing Hand-Drawn and Web Images</h3>
+
+    <div class="section-description">
+      <p>This is where SDEdit gets really fun - I applied it to hand-drawn sketches and random web images. The model tries to make them look like real photos while keeping the basic structure. The stick figures turn into actual people, and my rough sketches get filled in with realistic details. Lower i_start values give wilder interpretations, while higher values stay closer to the original drawing.</p>
+    </div>
+
+    <h4>Web Image: Stick Figures</h4>
+    <div class="image-grid cols-3-large">
+      <figure>
+        <img src="images/Unknown-71.png" alt="i_start=1">
+        <figcaption>i_start = 1</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-72.png" alt="i_start=3">
+        <figcaption>i_start = 3</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-73.png" alt="i_start=5">
+        <figcaption>i_start = 5</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-74.png" alt="i_start=7">
+        <figcaption>i_start = 7</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-75.png" alt="i_start=10">
+        <figcaption>i_start = 10</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-76.png" alt="i_start=20">
+        <figcaption>i_start = 20</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-77.png" alt="Original">
+        <figcaption>Original</figcaption>
+      </figure>
+    </div>
+
+    <h4>Hand-Drawn Image 1: Flower with Butterfly</h4>
+    <div class="image-grid cols-3-large">
+      <figure>
+        <img src="images/Unknown-78.png" alt="i_start=1">
+        <figcaption>i_start = 1</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-79.png" alt="i_start=3">
+        <figcaption>i_start = 3</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-80.png" alt="i_start=5">
+        <figcaption>i_start = 5</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-81.png" alt="i_start=7">
+        <figcaption>i_start = 7</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-82.png" alt="i_start=10">
+        <figcaption>i_start = 10</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-83.png" alt="i_start=20">
+        <figcaption>i_start = 20</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-84.png" alt="Original">
+        <figcaption>Original</figcaption>
+      </figure>
+    </div>
+
+    <h4>Hand-Drawn Image 2: Rocket</h4>
+    <div class="image-grid cols-3-large">
+      <figure>
+        <img src="images/Unknown-86.png" alt="i_start=1">
+        <figcaption>i_start = 1</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-87.png" alt="i_start=3">
+        <figcaption>i_start = 3</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-88.png" alt="i_start=5">
+        <figcaption>i_start = 5</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-89.png" alt="i_start=7">
+        <figcaption>i_start = 7</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-90.png" alt="i_start=10">
+        <figcaption>i_start = 10</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-91.png" alt="i_start=20">
+        <figcaption>i_start = 20</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-92.png" alt="Original">
+        <figcaption>Original</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============================================
+       PART 1.7.2: INPAINTING
+       ============================================ -->
+  <section id="part1-7-2">
+    <h3>1.7.2 Inpainting</h3>
+
+    <div class="section-description">
+      <p>For inpainting, I implemented the RePaint approach where we fill in masked regions while keeping the rest of the image intact. The trick is that at each denoising step, I replace pixels outside the mask with the appropriately-noised original image. This forces the model to generate content that blends seamlessly with the surroundings.</p>
+    </div>
+
+    <h4>Campanile Inpainting</h4>
+    <div class="image-grid cols-3-large">
+      <figure>
+        <img src="images/Unknown-93.png" alt="Original Campanile">
+        <figcaption>Original</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-94.png" alt="Mask">
+        <figcaption>Mask</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-95.png" alt="Inpainted Result">
+        <figcaption>Inpainted Result</figcaption>
+      </figure>
+    </div>
+
+    <h4>Custom Inpainting 1</h4>
+    <div class="image-grid cols-3-large">
+      <figure>
+        <img src="images/Unknown-96.png" alt="Original">
+        <figcaption>Original</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-97.png" alt="Mask">
+        <figcaption>Mask</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-98.png" alt="Inpainted Result">
+        <figcaption>Inpainted Result</figcaption>
+      </figure>
+    </div>
+
+    <h4>Custom Inpainting 2</h4>
+    <div class="image-grid cols-3-large">
+      <figure>
+        <img src="images/Unknown-99.png" alt="Original">
+        <figcaption>Original</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-100.png" alt="Mask">
+        <figcaption>Mask</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-101.png" alt="Inpainted Result">
+        <figcaption>Inpainted Result</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============================================
+       PART 1.7.3: TEXT-CONDITIONAL IMAGE-TO-IMAGE
+       ============================================ -->
+  <section id="part1-7-3">
+    <h3>1.7.3 Text-Conditional Image-to-image Translation</h3>
+
+    <div class="section-description">
+      <p>Here I combine SDEdit with text prompts to guide what the output looks like. Instead of just projecting to a generic "photo", I can tell it to make "a rocket ship" and watch the Campanile transform into a rocket. The lower i_start values create more dramatic transformations while higher values keep more of the original structure but with rocket-like features.</p>
+    </div>
+
+    <h4>Campanile with Text Prompt: "a rocket ship"</h4>
+    <div class="image-grid cols-3-large">
+      <figure>
+        <img src="images/Unknown-102.png" alt="i_start=1">
+        <figcaption>i_start = 1</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-103.png" alt="i_start=3">
+        <figcaption>i_start = 3</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-104.png" alt="i_start=5">
+        <figcaption>i_start = 5</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-105.png" alt="i_start=7">
+        <figcaption>i_start = 7</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-106.png" alt="i_start=10">
+        <figcaption>i_start = 10</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-107.png" alt="i_start=20">
+        <figcaption>i_start = 20</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-108.png" alt="Original">
+        <figcaption>Original</figcaption>
+      </figure>
+    </div>
+
+    <h4>Custom Image 1 with Text Prompt: "a rocket ship"</h4>
+    <div class="image-grid cols-3-large">
+      <figure>
+        <img src="images/Unknown-109.png" alt="i_start=1">
+        <figcaption>i_start = 1</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-110.png" alt="i_start=3">
+        <figcaption>i_start = 3</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-111.png" alt="i_start=5">
+        <figcaption>i_start = 5</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-112.png" alt="i_start=7">
+        <figcaption>i_start = 7</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-113.png" alt="i_start=10">
+        <figcaption>i_start = 10</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-114.png" alt="i_start=20">
+        <figcaption>i_start = 20</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-115.png" alt="Original">
+        <figcaption>Original</figcaption>
+      </figure>
+    </div>
+
+    <h4>Custom Image 2 with Text Prompt: "a rocket ship"</h4>
+    <div class="image-grid cols-3-large">
+      <figure>
+        <img src="images/Unknown-116.png" alt="i_start=1">
+        <figcaption>i_start = 1</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-117.png" alt="i_start=3">
+        <figcaption>i_start = 3</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-118.png" alt="i_start=5">
+        <figcaption>i_start = 5</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-119.png" alt="i_start=7">
+        <figcaption>i_start = 7</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-120.png" alt="i_start=10">
+        <figcaption>i_start = 10</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-121.png" alt="i_start=20">
+        <figcaption>i_start = 20</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-122.png" alt="Original">
+        <figcaption>Original</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============================================
+       PART 1.8: VISUAL ANAGRAMS
+       ============================================ -->
+  <section id="part1-8">
+    <h3>1.8 Visual Anagrams</h3>
+
+    <div class="section-description">
+      <p>Visual anagrams are super cool - they're images that look like one thing right-side up and something completely different when flipped. I compute noise estimates for both orientations and average them, so the denoising has to satisfy both prompts at once. The old man/campfire one works especially well - you can clearly see both interpretations depending on how you look at it.</p>
+    </div>
+
+    <h4>Visual Anagram 1: Old Man / Campfire</h4>
+    <p><strong>Prompt 1:</strong> "an oil painting of an old man"</p>
+    <p><strong>Prompt 2:</strong> "an oil painting of a campfire"</p>
+    <div class="image-grid cols-2">
+      <figure>
+        <img src="images/Unknown-123.png" alt="Old man (normal)">
+        <figcaption>Normal: "an oil painting of an old man"</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-124.png" alt="Campfire (flipped)">
+        <figcaption>Flipped: "an oil painting of a campfire"</figcaption>
+      </figure>
+    </div>
+
+    <h4>Visual Anagram 2: Skull / Waterfalls</h4>
+    <p><strong>Prompt 1:</strong> "a skull"</p>
+    <p><strong>Prompt 2:</strong> "waterfalls"</p>
+    <div class="image-grid cols-2">
+      <figure>
+        <img src="images/Unknown-125.png" alt="Skull (normal)">
+        <figcaption>Normal: "a skull"</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-126.png" alt="Waterfalls (flipped)">
+        <figcaption>Flipped: "waterfalls"</figcaption>
+      </figure>
+    </div>
+
+    <h4>Visual Anagram 3: Man Wearing Hat / Snowy Village</h4>
+    <p><strong>Prompt 1:</strong> "a man wearing a hat"</p>
+    <p><strong>Prompt 2:</strong> "a snowy village"</p>
+    <div class="image-grid cols-2">
+      <figure>
+        <img src="images/Unknown-127.png" alt="Man wearing hat (normal)">
+        <figcaption>Normal: "a man wearing a hat"</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-128.png" alt="Snowy village (flipped)">
+        <figcaption>Flipped: "a snowy village"</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============================================
+       PART 1.9: HYBRID IMAGES
+       ============================================ -->
+  <section id="part1-9">
+    <h3>1.9 Hybrid Images</h3>
+
+    <div class="section-description">
+      <p>Finally, I made hybrid images using the same frequency-based trick from earlier in the course - but now applied during diffusion! I take low frequencies from one noise estimate and high frequencies from another, so up close you see one image and from far away you see something else. Try squinting at the skull/waterfall one - the skull really pops out when you blur your vision.</p>
+    </div>
+
+    <h4>Hybrid Image 1: Skull + Waterfall</h4>
+    <p><strong>Low-frequency prompt:</strong> "a skull"</p>
+    <p><strong>High-frequency prompt:</strong> "a waterfall"</p>
+    <figure style="text-align: center; margin: 20px 0;">
+      <img src="images/Unknown-129.png" alt="Hybrid skull and waterfall" style="width: 700px; max-width: 100%;">
+      <figcaption>Hybrid: "a skull" (low freq) + "a waterfall" (high freq)</figcaption>
+    </figure>
+
+    <h4>Hybrid Image 2: Old Man + Campfire</h4>
+    <p><strong>Low-frequency prompt:</strong> "an oil painting of an old man"</p>
+    <p><strong>High-frequency prompt:</strong> "an oil painting of a campfire"</p>
+    <figure style="text-align: center; margin: 20px 0;">
+      <img src="images/Unknown-130.png" alt="Hybrid old man and campfire" style="width: 700px; max-width: 100%;">
+      <figcaption>Hybrid: "an oil painting of an old man" (low freq) + "an oil painting of a campfire" (high freq)</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============================================
+       PART 5B: FLOW MATCHING FROM SCRATCH
+       ============================================ -->
+  <h2 id="part5b">Part 5B: Flow Matching from Scratch!</h2>
+
+  <!-- ============================================
+       PART 1: TRAINING A SINGLE-STEP DENOISING UNET
+       ============================================ -->
+  <section id="part5b-1">
+    <h3>Part 1: Training a Single-Step Denoising UNet</h3>
+
+    <div class="section-description">
+      <p>In this part, I built my own denoiser from scratch using a UNet architecture. The idea is simple: given a noisy image z = x + σε, train the network to predict the clean image x directly using MSE loss. It's a good starting point before getting into the more complex flow matching stuff.</p>
+    </div>
+
+    <h4>1.2 Using the UNet to Train a Denoiser</h4>
+    <p>I trained the UNet on MNIST digits with a fixed noise level of σ = 0.5. The network learns to map noisy inputs to clean outputs by minimizing L2 loss. It's basically learning "what does a clean digit look like given this noisy version?"</p>
+
+    <h5>Visualization of Noising Process</h5>
+    <p>Visualizing different noising processes over σ ∈ [0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 1.0]:</p>
+    <figure class="result-image">
+      <img src="images/Unknown-132.png" alt="Noising process visualization">
+      <figcaption>MNIST digit at different noise levels</figcaption>
+    </figure>
+
+    <h5>1.2.1 Training</h5>
+    <p>I trained for 5 epochs with batch size 256 and learning rate 1e-4. The loss drops quickly in the first epoch and then gradually converges. You can see in the results that by epoch 5, the model does a decent job recovering the original digits from the noisy inputs.</p>
+    <figure class="result-image">
+      <img src="images/Unknown-133.png" alt="Training loss curve">
+      <figcaption>Training loss over iterations</figcaption>
+    </figure>
+
+    <p>Sample results on test set with noise level σ = 0.5:</p>
+    <figure class="result-image">
+      <img src="images/Unknown-134.png" alt="Training results">
+      <figcaption>Denoising results after 1st and 5th epoch</figcaption>
+    </figure>
+
+    <h5>1.2.2 Out-of-Distribution Testing</h5>
+    <p>Here I tested the denoiser on noise levels it wasn't trained on. Unsurprisingly, it struggles with σ values far from 0.5 - it does okay near the training noise level but gets worse the further you go. This shows why we need a more flexible approach that can handle any noise level.</p>
+    <figure class="result-image">
+      <img src="images/Unknown-135.png" alt="Out-of-distribution test results">
+      <figcaption>Denoising performance on different noise levels</figcaption>
+    </figure>
+
+    <h5>1.2.3 Denoising Pure Noise</h5>
+    <p>What happens if we try to denoise pure noise? I trained a separate model on σ = 1.0. Since there's literally no signal in the input, the MSE loss pushes the model to output the "average" of all training digits - resulting in blurry blobs that look like a mix of 0-9. This is an interesting failure case that motivates iterative approaches.</p>
+    <figure class="result-image">
+      <img src="images/Unknown-136.png" alt="Training loss curve for pure noise">
+      <figcaption>Training loss over iterations</figcaption>
+    </figure>
+
+    <p>Sample results on pure noise:</p>
+    <div class="image-grid cols-3-large">
+      <figure>
+        <img src="images/1.png" alt="Input pure noise">
+        <figcaption>Input (Noise)</figcaption>
+      </figure>
+      <figure>
+        <img src="images/2.png" alt="Epoch 1 output">
+        <figcaption>Epoch 1</figcaption>
+      </figure>
+      <figure>
+        <img src="images/3.png" alt="Epoch 5 output">
+        <figcaption>Epoch 5</figcaption>
+      </figure>
+      <figure>
+        <img src="images/4.png" alt="Input pure noise">
+        <figcaption>Input (Noise)</figcaption>
+      </figure>
+      <figure>
+        <img src="images/5.png" alt="Epoch 1 output">
+        <figcaption>Epoch 1</figcaption>
+      </figure>
+      <figure>
+        <img src="images/6.png" alt="Epoch 5 output">
+        <figcaption>Epoch 5</figcaption>
+      </figure>
+      <figure>
+        <img src="images/7.png" alt="Input pure noise">
+        <figcaption>Input (Noise)</figcaption>
+      </figure>
+      <figure>
+        <img src="images/8.png" alt="Epoch 1 output">
+        <figcaption>Epoch 1</figcaption>
+      </figure>
+      <figure>
+        <img src="images/9.png" alt="Epoch 5 output">
+        <figcaption>Epoch 5</figcaption>
+      </figure>
+    </div>
+
+    <p><strong>Observations:</strong> The outputs converge to a blurry average of all training digits. With MSE loss, the model learns to predict the centroid that minimizes squared distances to all training examples. Since the input is pure noise with no digit-specific information, the model outputs the "average digit" - a blend of all 0-9 digits, which appears as a blurry blob.</p>
+  </section>
+
+  <!-- ============================================
+       PART 2: TRAINING A FLOW MATCHING MODEL
+       ============================================ -->
+  <section id="part5b-2">
+    <h3>Part 2: Training a Flow Matching Model</h3>
+
+    <div class="section-description">
+      <p>Now for flow matching - instead of predicting the clean image directly, I train the UNet to predict the "velocity" v = x₁ - z that points from noisy to clean. Then I can integrate this velocity field over time to gradually denoise. This is more flexible than the one-step approach and can handle generating images from pure noise.</p>
+    </div>
+
+    <h4>2.2 Training the Time-Conditioned UNet</h4>
+    <p>I added time conditioning using FCBlocks that modulate the UNet features based on the current timestep t. The model learns v(xₜ, t) where xₜ interpolates between noise and data. This way the network knows "how far along" in the denoising process it is.</p>
+    <figure class="result-image">
+      <img src="images/Unknown-137.png" alt="Training loss curve for time-conditioned UNet">
+      <figcaption>Training loss over iterations</figcaption>
+    </figure>
+
+    <h4>2.3 Sampling from the Time-Conditioned UNet</h4>
+    <p>To generate images, I integrate the learned flow from t=0 to t=1 using Euler steps. Starting from pure noise, I repeatedly apply x_{t+dt} = xₜ + dt·v(xₜ, t) until I get a clean image. You can see the samples improve a lot from epoch 1 to epoch 10 - the digits become much clearer and more recognizable.</p>
+    <div class="image-grid cols-3-large">
+      <figure>
+        <img src="images/Unknown-138.png" alt="Samples after Epoch 1">
+        <figcaption>Epoch 1</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-139.png" alt="Samples after Epoch 5">
+        <figcaption>Epoch 5</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-140.png" alt="Samples after Epoch 10">
+        <figcaption>Epoch 10</figcaption>
+      </figure>
+    </div>
+
+    <h4>2.5 Training the Class-Conditioned UNet</h4>
+    <p>To control what digit gets generated, I added class conditioning to the UNet. The key trick is dropping the class label randomly (p=0.1) during training - this lets us use classifier-free guidance at sampling time to get sharper, more recognizable digits.</p>
+    <figure class="result-image">
+      <img src="images/Unknown-145.png" alt="Training loss curve for class-conditioned UNet">
+      <figcaption>Training loss over iterations</figcaption>
+    </figure>
+
+    <h4>2.6 Sampling from the Class-Conditioned UNet</h4>
+    <p>For sampling, I use CFG with γ=5: v = v_uncond + γ(v_cond - v_uncond). This amplifies the class signal so the generated digits are cleaner and actually look like the target class. The improvement from epoch 1 to epoch 10 is pretty dramatic - by the end you can clearly tell what digit each sample is supposed to be.</p>
+    <div class="image-grid cols-3-large">
+      <figure>
+        <img src="images/Unknown-142.png" alt="Epoch 1 samples">
+        <figcaption>Epoch 1</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-143.png" alt="Epoch 5 samples">
+        <figcaption>Epoch 5</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-144.png" alt="Epoch 10 samples">
+        <figcaption>Epoch 10</figcaption>
+      </figure>
+    </div>
+
+    <h5>Training without Learning Rate Scheduler</h5>
+    <p>As a bonus, I also tried training without the learning rate scheduler. To compensate for not having the exponential decay (gamma=0.95), I just used a lower constant learning rate of 1e-3 instead of 1e-2. The results are pretty similar - turns out you can get away without the fancy scheduling if you pick a good constant rate.</p>
+    <div class="image-grid cols-3-large">
+      <figure>
+        <img src="images/Unknown-146.png" alt="No scheduler - Epoch 1">
+        <figcaption>Epoch 1 (no scheduler)</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-147.png" alt="No scheduler - Epoch 5">
+        <figcaption>Epoch 5 (no scheduler)</figcaption>
+      </figure>
+      <figure>
+        <img src="images/Unknown-148.png" alt="No scheduler - Epoch 10">
+        <figcaption>Epoch 10 (no scheduler)</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============================================
+       FOOTER
+       ============================================ -->
+  <footer>
+    <p>CS180: Intro to Computer Vision and Computational Photography</p>
+    <p>University of California, Berkeley | Fall 2025</p>
+    <p style="margin-top: 15px; font-size: 0.85em; color: #999;">
+      This project was a joint effort by Daniel Geng, Ryan Tabrizi, Hang Gao, Jingfeng Yang, and Jameson Crate, advised by Liyue Shen, Andrew Owens, and Alexei Efros.
+    </p>
+  </footer>
+
+</body>
+</html>
